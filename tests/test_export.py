@@ -39,3 +39,11 @@ def test_commit_text_is_escaped(tmp_path):
     assert "fix a&lt;b" in notebook_html
     assert "<script>alert" not in notebook_html and "&lt;script&gt;" in notebook_html
     assert "line one\nline two" in notebook_html
+
+
+def test_analysis_ignore_uses_wildcards():
+    from pylabnotebook.export import is_ignored
+    assert is_ignored("reports/a.html", ["*.html"])
+    assert is_ignored("old/reports/a.html", ["reports/"])
+    assert is_ignored("draft_a.html", ["draft_*"])
+    assert not is_ignored("reports/a.html", ["*.txt", "old"])

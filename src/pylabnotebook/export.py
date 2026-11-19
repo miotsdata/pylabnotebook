@@ -9,7 +9,7 @@ This module contains notebook export functions.
 import subprocess
 import os
 import yaml
-import re
+from fnmatch import fnmatch
 from datetime import datetime
 from jinja2 import Environment, FileSystemLoader
 
@@ -146,7 +146,7 @@ def get_commit_info(commit_sha: str, analysis_ext: list[str], excluded_patterns:
     analysis_files: list[str] = [key for key, _ in changed_files.items()
                                  if any(ext in key for ext in analysis_ext) and
                                  os.path.isfile(key) and not
-                                 any(re.search(pattern, key) for pattern in excluded_patterns)]
+                                 is_ignored(key, excluded_patterns)]
     commit_info: dict = {'date': date,
                          'author': author,
                          'title': title,
@@ -155,3 +155,24 @@ def get_commit_info(commit_sha: str, analysis_ext: list[str], excluded_patterns:
                          'analysis_files': analysis_files}
 
     return commit_info
+
+
+def is_ignored(file_path: str, ignore_patterns: list[str]) -> bool:
+    """Check file_path against gitignore-like wildcard patterns.
+
+    A pattern matches the whole path, any path component (``*.tmp``, ``old_reports``) or any
+    folder (``old_reports/``, ``reports/2023``).
+
+    :param file_path: path relative to the git root, with / separators.
+    :type file_path: str
+    :param ignore_patterns: wildcard patterns (``*``, ``?``, ``[]``).
+    :type ignore_patterns: list[str]
+    :return: whether file_path matches any pattern.
+    :rtype: bool
+    """
+    for ignore_pattern in ignore_patterns:
+        ignore_pattern = ignore_pattern.strip("/")
+        if any(fnmatch(file_path, candidate) for candidate in
+               (ignore_pattern, f"{ignore_pattern}/*", f"*/{ignore_pattern}", f"*/{ignore_pattern}/*")):
+            return True
+    return False

@@ -157,3 +157,12 @@ def test_remote_url(tmp_path):
     first_sha = git("rev-list", "--max-parents=0", "HEAD").strip()
     assert f"https://gitlab.com/someone/project/commit/{first_sha}" in notebook_html
     assert f"https://gitlab.com/someone/project/blob/{first_sha}/my%20report.html" in notebook_html
+
+
+def test_sidebar_lists_each_day_once(tmp_path):
+    make_repository(tmp_path)
+    commit_file("a.txt", "a", "one")
+    commit_file("b.txt", "b", "two")
+    notebook_html = export_html()
+    day = git("log", "-1", "--format=%as").strip()
+    assert notebook_html.count(f'href="#day-{day}"') == 1 and f'id="day-{day}"' in notebook_html

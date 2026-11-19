@@ -15,14 +15,22 @@
       <h1 id="labtitle">{{ config["NOTEBOOK_NAME"] }} lab notebook</h1>
       <p id="creationdate">Created on: {{ create_date }}</p>
       <p id="labauthor">Author: {{ config["LAB_AUTHOR"] or "" }}</p>
+      <input type="search" id="search" placeholder="Search commits (title, message, author, files, sha)" />
     </header>
+    <nav id="sidebar">
+      <ul>
+        {% for day in commits | map(attribute = "date") | unique %}
+        <li><a href="#day-{{ day }}">{{ day }}</a></li>
+        {% endfor %}
+      </ul>
+    </nav>
     {% set ns = namespace(last_date = None) %}
     <main>
       <button id="bottom-btn" class="go-bottom">&#x25BC;</button>
 
       {% for commit in commits %} {% if commit['date'] !=
       ns.last_date %}
-      <h2 class="day-el">{{ commit.get('date') }}</h2>
+      <h2 class="day-el" id="day-{{ commit.date }}">{{ commit.get('date') }}</h2>
       {% set ns.last_date = commit.get('date') %} {% endif %}
 
       <div class="commit-el" id="{{ commit.short_sha }}">
@@ -79,6 +87,24 @@
       </p>
     </footer>
     <script>
+      // Hide commits not matching the search, and days left without commits
+      document.getElementById("search").addEventListener("input", function () {
+        const query = this.value.toLowerCase();
+        let dayHeading = null;
+        let dayHasMatches = false;
+        for (const element of document.querySelector("main").children) {
+          if (element.classList.contains("day-el")) {
+            if (dayHeading) dayHeading.hidden = !dayHasMatches;
+            dayHeading = element;
+            dayHasMatches = false;
+          } else if (element.classList.contains("commit-el")) {
+            element.hidden = !element.textContent.toLowerCase().includes(query);
+            dayHasMatches = dayHasMatches || !element.hidden;
+          }
+        }
+        if (dayHeading) dayHeading.hidden = !dayHasMatches;
+      });
+
       document
         .getElementById("bottom-btn")
         .addEventListener("click", function () {

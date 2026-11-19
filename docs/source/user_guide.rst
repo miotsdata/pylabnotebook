@@ -57,7 +57,7 @@ To export the notebook as a single .html file, from any folder of the project ty
 
    (.venv) $ labnotebook export -o my_project.html
 
-It will create a my_project.html file with the notebook (the path is relative to the current folder). You can then share the notebook with peers.
+It will create a my_project.html file with the notebook, with a sidebar of dates and a search box to filter commits (the path is relative to the current folder). You can then share the notebook with peers.
 
 To export only part of the history:
 

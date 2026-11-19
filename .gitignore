@@ -11,3 +11,6 @@ dist/.pdm-python
 dist/
 docs/build
 .venv/
+
+# labnotebook upgrade backup
+.labnotebookrc.bak

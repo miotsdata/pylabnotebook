@@ -23,3 +23,21 @@ def test_notebook_commits_are_ignored(tmp_path):
     assert count_commits([]) == 2
     assert count_commits([NOTEBOOK_AUTHOR_EMAIL]) == 1
     assert count_commits(["tester"]) == 1
+
+
+def test_export_with_commit_flag(tmp_path, monkeypatch):
+    from pylabnotebook.cli import main
+    from pylabnotebook.init import init_labnotebook
+    os.chdir(tmp_path)
+    subprocess.run(["git", "init", "-q"], check = True)
+    subprocess.run(["git", "config", "user.name", "tester"], check = True)
+    subprocess.run(["git", "config", "user.email", "tester@example.org"], check = True)
+    init_labnotebook("demo")
+    subprocess.run(["git", "add", "-A"], check = True)
+    subprocess.run(["git", "commit", "-q", "-m", "init"], check = True)
+    os.makedirs("docs")
+    os.chdir("docs")
+    monkeypatch.setattr("sys.argv", ["labnotebook", "export", "-o", "notebook.html", "--commit"])
+    main()
+    last_commit = subprocess.check_output(["git", "log", "-1", "--format=%ae %s", "--name-only"], text = True)
+    assert NOTEBOOK_AUTHOR_EMAIL in last_commit and "docs/notebook.html" in last_commit

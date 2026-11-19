@@ -5,6 +5,7 @@ This module is the cli module where cli functionality of pylabnotebook is define
 # pylint: disable=line-too-long
 
 import argparse
+import os
 import subprocess
 import sys
 
@@ -39,6 +40,8 @@ def main():
                                default = False, action = "store_true")
     export_parser.add_argument("--no-link", default = False, action = "store_true",
                                help = "Disable links to analyses files.") # pylint: disable=line-too-long
+    export_parser.add_argument("-c", "--commit", default = False, action = "store_true",
+                               help = "Commit the exported notebook (same as labnotebook commit)")
 
     commit_parser: argparse.ArgumentParser = subparsers.add_parser("commit", help = f"Commit the exported notebook as {NOTEBOOK_AUTHOR_NAME} <{NOTEBOOK_AUTHOR_EMAIL}>, so that it is excluded from the notebook (see IGNORE_AUTHORS)") # pylint: disable=line-too-long
     commit_parser.add_argument("notebook_file", help = "Path of the exported notebook HTML file")
@@ -55,7 +58,10 @@ def main():
             sys.exit(128)
     elif args.command == "export":
         try:
-            export_labnotebook(args.output, args.force, not args.no_link)
+            output_path: str = os.path.abspath(args.output)  # export moves to the git root
+            export_labnotebook(output_path, args.force, not args.no_link)
+            if args.commit:
+                commit_labnotebook(output_path)
         except NotGitRepoError as e:
             print(e)
             sys.exit(128)
@@ -68,6 +74,8 @@ def main():
         except EmptyHistoryError as e:
             print(e)
             sys.exit(5)
+        except subprocess.CalledProcessError as error:
+            sys.exit(error.returncode)
     elif args.command == "commit":
         try:
             commit_labnotebook(args.notebook_file, args.message)

@@ -70,6 +70,8 @@ If the exported notebook is tracked in the repository, commit it with:
 
 The commit is made as ``labnotebook <labnotebook@localhost>`` (only the notebook file is committed, anything else you staged is left untouched), so it does not appear in the notebook at the next export. Use ``-m`` to change the commit message.
 
+To export and commit in one step: ``labnotebook export -o my_project.html -f --commit``.
+
 Notebook customization
 --------------------------------
 

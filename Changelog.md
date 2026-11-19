@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Sidebar with links to dates in order (to move easier throughout the document).
+- Git tags shown as milestone badges next to the commit title.
 - Search box to filter commits by title, message, author, files or sha.
 - `labnotebook commit` command: commits the exported notebook as `labnotebook <labnotebook@localhost>`.
 - `labnotebook export --commit`: export and commit the notebook in one step.

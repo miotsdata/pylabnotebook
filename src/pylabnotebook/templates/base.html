@@ -34,7 +34,9 @@
       {% set ns.last_date = commit.get('date') %} {% endif %}
 
       <div class="commit-el" id="{{ commit.short_sha }}">
-        <h3 class="title-el">{{ commit.get('title') }}</h3>
+        <h3 class="title-el">
+          {% for tag in commit.tags %}<span class="tag-el">{{ tag }}</span> {% endfor %}{{ commit.title }}
+        </h3>
         <p class="mess-el">{{ commit.get('message') }}</p>
         <p class="author-el">Author: {{ commit.get('author') }}</p>
         <p class="sha-el">

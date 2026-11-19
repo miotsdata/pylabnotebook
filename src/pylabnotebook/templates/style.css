@@ -83,6 +83,14 @@ p {
     font-size: 0.85em;
 }
 
+.tag-el {
+    background-color: rgba(133, 167, 119, 0.8);
+    border-radius: 5px;
+    color: white;
+    font-size: 0.8em;
+    padding: 0.1em 0.5em;
+}
+
 .commit-el {
     padding: 1rem;
 }

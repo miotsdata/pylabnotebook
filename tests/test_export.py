@@ -166,3 +166,13 @@ def test_sidebar_lists_each_day_once(tmp_path):
     notebook_html = export_html()
     day = git("log", "-1", "--format=%as").strip()
     assert notebook_html.count(f'href="#day-{day}"') == 1 and f'id="day-{day}"' in notebook_html
+
+
+def test_tags_are_shown(tmp_path):
+    make_repository(tmp_path)
+    commit_file("a.txt", "a", "one")
+    git("tag", "lightweight-tag")
+    git("tag", "-a", "annotated-tag", "-m", "milestone")
+    notebook_html = export_html()
+    assert '<span class="tag-el">lightweight-tag</span>' in notebook_html
+    assert '<span class="tag-el">annotated-tag</span>' in notebook_html

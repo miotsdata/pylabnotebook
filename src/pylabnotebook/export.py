@@ -135,7 +135,7 @@ def get_commits(reverse_history: bool, ignored_authors: list[str], analysis_ext:
     :type log_arguments: list[str]
     :param ignored_messages: regular expressions: commits whose title matches any are left out.
     :type ignored_messages: list[str]
-    :return: one dict per commit with sha, short_sha, author, author_email, date, title, message,
+    :return: one dict per commit with sha, short_sha, tags, author, author_email, date, title, message,
         changed_files (list of dicts, see parse_raw_changes) and analysis_files (subset of
         changed_files).
     :rtype: list[dict]
@@ -155,6 +155,15 @@ def get_commits(reverse_history: bool, ignored_authors: list[str], analysis_ext:
     head_files: list[str] = subprocess.check_output(["git", "ls-tree", "-r", "-z", "HEAD"], text = True).split("\0")
     head_blobs: dict = {tree_entry.split("\t", 1)[1]: tree_entry.split()[2] for tree_entry in head_files if tree_entry}
 
+    # Tags by commit (%(*objectname) is the commit of annotated tags)
+    tag_refs: list[str] = subprocess.check_output(["git", "for-each-ref", "refs/tags",
+                                                   "--format=%(objectname) %(*objectname) %(refname:short)"],
+                                                  text = True).splitlines()
+    tags_by_sha: dict = {}
+    for tag_ref in tag_refs:
+        tag_object, tagged_commit, tag_name = tag_ref.split(" ", 2)
+        tags_by_sha.setdefault(tagged_commit or tag_object, []).append(tag_name)
+
     ignored_authors = set(ignored_authors)
     commits: list[dict] = []
     for commit_record in git_log.split(RECORD_SEPARATOR)[1:]:
@@ -165,6 +174,7 @@ def get_commits(reverse_history: bool, ignored_authors: list[str], analysis_ext:
         if any(re.search(message_pattern, commit["title"]) for message_pattern in ignored_messages):
             continue
         commit["short_sha"] = commit["sha"][:7]
+        commit["tags"] = tags_by_sha.get(commit["sha"], [])
         commit["message"] = commit["message"].strip()
         commit["changed_files"] = parse_raw_changes(raw_changes)
         commit["analysis_files"] = [changed_file for changed_file in commit["changed_files"]

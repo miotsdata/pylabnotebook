@@ -13,6 +13,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `labnotebook commit` command: commits the exported notebook as `labnotebook <labnotebook@localhost>`.
 - `IGNORE_AUTHORS` config option: commits by these author names/emails are excluded from the notebook (defaults to the `labnotebook commit` identity, also for existing `.labnotebookrc` files).
 
+### Changed
+
+- `ANALYSIS_IGNORE` patterns are gitignore-like wildcards (as documented) instead of regular expressions.
+- Commit dates are author dates (unchanged by rebase/amend), commits ordered by author date.
+- `LAB_CSS` empty means the bundled style; custom paths are relative to the git root.
+- Export output path is relative to the current folder; analysis links are relative to the notebook.
+- Changed files show their git status; footer shows the pylabnotebook version.
+- Requires Python >= 3.9.
+
+### Fixed
+
+- PyYAML was not declared as a dependency; dropped argparse, setuptools and docs-only dependencies.
+- Commit titles/messages are HTML-escaped; line breaks are kept.
+- `ANALYSIS_EXT` matches file extensions only (`.html` no longer matches `report.html.bak`).
+- Renamed files and file names with non-ASCII characters.
+- Analysis files changed in later commits are flagged, since links open the current version.
+- `init` works when git `user.name` is not set; error message referenced the non-existing `create` command.
+- Export is much faster on long histories (one git call instead of three per commit).
+
 ## [0.3.1] - 2024-11-15
 
 ### Fix

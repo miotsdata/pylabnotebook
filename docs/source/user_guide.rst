@@ -51,13 +51,13 @@ A message that confirms the creation of the .labnotebookrc file should appear on
 Export a notebook
 --------------------------------
 
-To export the notebook as a single .html file, from the root of the project type:
+To export the notebook as a single .html file, from any folder of the project type:
 
 .. code-block:: console
 
    (.venv) $ labnotebook export -o my_project.html
 
-It will create a my_project.html file with the notebook. You can then share the notebook with peers.
+It will create a my_project.html file with the notebook (the path is relative to the current folder). You can then share the notebook with peers.
 
 Commit the notebook
 --------------------------------
@@ -75,7 +75,7 @@ Notebook customization
 
 There are several customization that can be applied to the notebook:
 
-* you can provide your personal css file by setting it in the `.labnotebookrc` file in *LAB_CSS* variable.
+* you can provide your personal css file by setting its path (relative to the git root) in the `.labnotebookrc` file in *LAB_CSS* variable. Leave it empty to use the default style.
 
 * you can decide to show commits from last to first (default) or from first to last (changing *REVERSE_HISTORY* variable in `.labnotebookrc` to True).
 
@@ -86,11 +86,11 @@ There are several customization that can be applied to the notebook:
 Link to analysis files
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
-When exporting the notebook, it automatically create a list of analysis files for each commit with direct links to them (starting from git folder root directory). By default, it takes all the .html files changed/added in that commit (not the deleted or renamed ones).
+When exporting the notebook, it automatically creates a list of analysis files for each commit with direct links to them (relative to the folder of the exported notebook). By default, it takes all the .html files changed/added in that commit that still exist. Links open the current version of the file: if the file was changed in a later commit, it is marked as such.
 
 If you want to add different extensions, you can update the `.labnotebookrc` file by adding/removing extensions in the ANALYSIS_EXT variable. Each extension should be separated by a comma, as it is considered a list (eg. "ANALYSIS_EXT": ['.html', '.txt']): just type the extension, not wildcards or other special characters.
 
-Moreover, changing values inside "ANALYSIS_IGNORE" list, you can exclude some files/folders to be recognized as analysis files (as for a standard .gitignore file it will use wildcards).
+Moreover, changing values inside "ANALYSIS_IGNORE" list, you can exclude some files/folders to be recognized as analysis files. As in a .gitignore file, it uses wildcards: a pattern matches the whole path, any file/folder name or any folder (eg. ANALYSIS_IGNORE: ['draft_*', 'old_reports/', '*.tmp.html']).
 
 If you want to disable all links, pass the `no-link` flag to the export command.
 

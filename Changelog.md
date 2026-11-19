@@ -23,7 +23,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- `ANALYSIS_IGNORE` patterns are gitignore-like wildcards (as documented) instead of regular expressions.
 - Commit dates are author dates (unchanged by rebase/amend), commits ordered by author date.
 - `LAB_CSS` empty means the bundled style; custom paths are relative to the git root.
 - Export output path is relative to the current folder; analysis links are relative to the notebook.
@@ -32,6 +31,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- `ANALYSIS_IGNORE` is documented as regular expressions (as implemented); invalid patterns give a clear error instead of a traceback.
 - PyYAML was not declared as a dependency; dropped argparse, setuptools and docs-only dependencies.
 - Commit titles/messages are HTML-escaped; line breaks are kept.
 - `ANALYSIS_EXT` matches file extensions only (`.html` no longer matches `report.html.bak`).

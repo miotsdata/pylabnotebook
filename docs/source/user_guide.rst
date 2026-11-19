@@ -102,7 +102,11 @@ When exporting the notebook, it automatically creates a list of analysis files f
 
 If you want to add different extensions, you can update the `.labnotebookrc` file by adding/removing extensions in the ANALYSIS_EXT variable. Each extension should be separated by a comma, as it is considered a list (eg. "ANALYSIS_EXT": ['.html', '.txt']): just type the extension, not wildcards or other special characters.
 
-Moreover, changing values inside "ANALYSIS_IGNORE" list, you can exclude some files/folders to be recognized as analysis files. As in a .gitignore file, it uses wildcards: a pattern matches the whole path, any file/folder name or any folder (eg. ANALYSIS_IGNORE: ['draft_*', 'old_reports/', '*.tmp.html']).
+Moreover, changing values inside "ANALYSIS_IGNORE" list, you can exclude some files/folders to be recognized as analysis files. Each value is a regular expression searched anywhere in the file path (relative to the git root), eg. ``ANALYSIS_IGNORE: ['^old_reports/', '(^|/)draft_', '\.tmp\.html$']``. Keep in mind that:
+
+* a pattern matches anywhere: ``old`` also matches ``golden.html``; use ``^old/`` for a top level folder or ``(^|/)old/`` for a folder at any level;
+* ``.`` matches any character: write ``\.html$``, not ``.html``;
+* wildcards are not regular expressions: ``*.html`` is invalid (export stops with an error message).
 
 Images changed in a commit (extensions in *IMAGE_EXT*, default png, jpg, jpeg, gif, svg, webp) are shown as thumbnails, unless they were changed in a later commit (the notebook would show the newer version). *ANALYSIS_IGNORE* applies to them too.
 

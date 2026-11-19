@@ -10,11 +10,10 @@ import subprocess
 import os
 import re
 import yaml
-from fnmatch import fnmatch
 from datetime import datetime
 from jinja2 import Environment, FileSystemLoader
 
-from .exceptions import NotGitRepoError, NotInitializedError, OutputAlreadyExistsError, EmptyHistoryError
+from .exceptions import NotGitRepoError, NotInitializedError, OutputAlreadyExistsError, EmptyHistoryError, InvalidConfigError
 from .commit import NOTEBOOK_AUTHOR_EMAIL
 from .version import __version__
 
@@ -71,6 +70,7 @@ def export_labnotebook(output_file: str, force: bool, link: bool, since: str = N
 
     with open(".labnotebookrc", "r", encoding = 'utf8') as config_file:
         config: dict = yaml.safe_load(config_file)
+    check_regex_options(config)
 
     # 3. Check if file already exists and force is False
     if os.path.exists(output_path) and not force:
@@ -226,21 +226,28 @@ def parse_raw_changes(raw_changes: str) -> list[dict]:
 
 
 def is_ignored(file_path: str, ignore_patterns: list[str]) -> bool:
-    """Check file_path against gitignore-like wildcard patterns.
-
-    A pattern matches the whole path, any path component (``*.tmp``, ``old_reports``) or any
-    folder (``old_reports/``, ``reports/2023``).
+    """Check file_path against regular expressions (re.search, so they match anywhere in the path).
 
     :param file_path: path relative to the git root, with / separators.
     :type file_path: str
-    :param ignore_patterns: wildcard patterns (``*``, ``?``, ``[]``).
+    :param ignore_patterns: regular expressions, eg. ``^old/`` or ``\\.tmp\\.html$``.
     :type ignore_patterns: list[str]
     :return: whether file_path matches any pattern.
     :rtype: bool
     """
-    for ignore_pattern in ignore_patterns:
-        ignore_pattern = ignore_pattern.strip("/")
-        if any(fnmatch(file_path, candidate) for candidate in
-               (ignore_pattern, f"{ignore_pattern}/*", f"*/{ignore_pattern}", f"*/{ignore_pattern}/*")):
-            return True
-    return False
+    return any(re.search(ignore_pattern, file_path) for ignore_pattern in ignore_patterns)
+
+
+def check_regex_options(config: dict) -> None:
+    """Raise a readable error for invalid regular expressions in the config.
+
+    :param config: content of .labnotebookrc.
+    :type config: dict
+    :raises InvalidConfigError: if a pattern of ANALYSIS_IGNORE or IGNORE_MESSAGES is not a valid regex.
+    """
+    for option_name in ("ANALYSIS_IGNORE", "IGNORE_MESSAGES"):
+        for pattern in config.get(option_name) or []:
+            try:
+                re.compile(pattern)
+            except re.error as regex_error:
+                raise InvalidConfigError(f"{RED}Error: {option_name} in .labnotebookrc: {pattern!r} is not a valid regular expression ({regex_error}). Patterns are regular expressions, eg. '\\.tmp\\.html$' instead of '*.tmp.html'.{NCOL}") from None

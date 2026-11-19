@@ -13,7 +13,7 @@ from .version import __version__
 from .init import init_labnotebook
 from .export import export_labnotebook
 from .commit import commit_labnotebook, NOTEBOOK_AUTHOR_NAME, NOTEBOOK_AUTHOR_EMAIL
-from .exceptions import NotGitRepoError, NotInitializedError, OutputAlreadyExistsError, EmptyHistoryError
+from .exceptions import NotGitRepoError, NotInitializedError, OutputAlreadyExistsError, EmptyHistoryError, InvalidConfigError
 
 def main():
     """Main cli function handler.
@@ -80,6 +80,9 @@ def main():
         except EmptyHistoryError as e:
             print(e)
             sys.exit(5)
+        except InvalidConfigError as e:
+            print(e)
+            sys.exit(22)
         except subprocess.CalledProcessError as error:
             sys.exit(error.returncode)
     elif args.command == "commit":

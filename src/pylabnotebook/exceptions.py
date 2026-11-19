@@ -20,5 +20,9 @@ class EmptyHistoryError(Exception):
     """Exception class used when git history is empty."""
 
 
+class InvalidConfigError(Exception):
+    """Exception class used when .labnotebookrc contains an invalid value."""
+
+
 # Backward compatible alias of the misspelled name
 EmptyHisoryError = EmptyHistoryError

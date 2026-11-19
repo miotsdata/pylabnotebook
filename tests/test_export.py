@@ -41,12 +41,19 @@ def test_commit_text_is_escaped(tmp_path):
     assert "line one\nline two" in notebook_html
 
 
-def test_analysis_ignore_uses_wildcards():
+def test_analysis_ignore_uses_regex(tmp_path):
     from pylabnotebook.export import is_ignored
-    assert is_ignored("reports/a.html", ["*.html"])
-    assert is_ignored("old/reports/a.html", ["reports/"])
-    assert is_ignored("draft_a.html", ["draft_*"])
-    assert not is_ignored("reports/a.html", ["*.txt", "old"])
+    from pylabnotebook.exceptions import InvalidConfigError
+    import pytest
+    assert is_ignored("old/a.html", ["^old/"])
+    assert is_ignored("x/draft_a.html", ["(^|/)draft_"])
+    assert not is_ignored("golden/a.html", ["^old/", r"\.txt$"])
+    make_repository(tmp_path)
+    commit_file("a.txt", "a", "work")
+    with open(".labnotebookrc", "a", encoding = "utf-8") as config_file:
+        config_file.write("ANALYSIS_IGNORE: ['*.html']\n")
+    with pytest.raises(InvalidConfigError, match = "not a valid regular expression"):
+        export_html()
 
 
 def test_analysis_ext_matches_suffix_only(tmp_path):

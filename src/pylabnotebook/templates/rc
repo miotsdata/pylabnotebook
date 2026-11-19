@@ -2,6 +2,10 @@ NOTEBOOK_NAME: {{ name }}
 LAB_AUTHOR: {{ author }}
 REVERSE_HISTORY: False
 SHOW_ANALYSIS_FILES: True
-LAB_CSS: {{ script_dir }}/templates/style.css
+LAB_CSS:  # custom css file (relative to the git root), empty for the default style
 ANALYSIS_EXT: ['.html']
 ANALYSIS_IGNORE: []
+IGNORE_AUTHORS: ['{{ notebook_author_email }}']
+IGNORE_MESSAGES: []
+REMOTE_URL: {{ remote_url }}  # web url of the repository, used to link commits and file versions
+IMAGE_EXT: ['.png', '.jpg', '.jpeg', '.gif', '.svg', '.webp']

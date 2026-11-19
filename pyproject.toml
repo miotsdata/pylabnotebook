@@ -1,18 +1,15 @@
 [project]
 name = "pylabnotebook"
-version = "0.3.1"
+version = "0.4.0"
 description = "This package provides functions to write an automated labnotebook using git."
 authors = [
     {name = "Matteo Miotto", email = "miotsdata@gmail.com"},
 ]
 dependencies = [
-    "setuptools>=72.1.0",
-    "argparse>=1.4.0",
-    "sphinx-rtd-theme>=2.0.0",
-    "myst-parser>=4.0.0",
     "Jinja2>=3.1.4",
+    "PyYAML>=6.0",
 ]
-requires-python = ">=3.7"
+requires-python = ">=3.9"
 readme = "README.md"
 license = {text = "MIT"}
 classifiers = [
@@ -35,3 +32,8 @@ build-backend = "pdm.backend"
 
 [tool.pdm]
 distribution = true
+
+[dependency-groups]
+test = [
+    "pytest>=9.2.0",
+]

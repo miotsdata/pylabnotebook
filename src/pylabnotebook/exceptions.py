@@ -16,5 +16,13 @@ class NotInitializedError(Exception):
 class OutputAlreadyExistsError(Exception):
     """Exception class used when output of export is already present and export is not run with force."""
 
-class EmptyHisoryError(Exception):
+class EmptyHistoryError(Exception):
     """Exception class used when git history is empty."""
+
+
+class InvalidConfigError(Exception):
+    """Exception class used when .labnotebookrc contains an invalid value."""
+
+
+# Backward compatible alias of the misspelled name
+EmptyHisoryError = EmptyHistoryError

@@ -5,12 +5,15 @@ This module is the cli module where cli functionality of pylabnotebook is define
 # pylint: disable=line-too-long
 
 import argparse
+import os
+import subprocess
 import sys
 
 from .version import __version__
-from .init import init_labnotebook
+from .init import init_labnotebook, upgrade_labnotebook
 from .export import export_labnotebook
-from .exceptions import NotGitRepoError, NotInitializedError, OutputAlreadyExistsError, EmptyHisoryError
+from .commit import commit_labnotebook, NOTEBOOK_AUTHOR_NAME, NOTEBOOK_AUTHOR_EMAIL
+from .exceptions import NotGitRepoError, NotInitializedError, OutputAlreadyExistsError, EmptyHistoryError, InvalidConfigError
 
 def main():
     """Main cli function handler.
@@ -37,6 +40,22 @@ def main():
                                default = False, action = "store_true")
     export_parser.add_argument("--no-link", default = False, action = "store_true",
                                help = "Disable links to analyses files.") # pylint: disable=line-too-long
+    export_parser.add_argument("-c", "--commit", default = False, action = "store_true",
+                               help = "Commit the exported notebook (same as labnotebook commit)")
+    export_parser.add_argument("--since", help = "Only commits more recent than this date (eg. 2024-01-31 or '2 weeks ago')")
+    export_parser.add_argument("--until", help = "Only commits older than this date")
+    export_parser.add_argument("--branch", help = "Branch, tag or revision range (eg. main..feature) to export instead of the current branch")
+    export_parser.add_argument("--path", action = "append", dest = "paths",
+                               help = "Only commits changing this file/folder (can be repeated)")
+
+    commit_parser: argparse.ArgumentParser = subparsers.add_parser("commit", help = f"Commit the exported notebook as {NOTEBOOK_AUTHOR_NAME} <{NOTEBOOK_AUTHOR_EMAIL}>, so that it is excluded from the notebook (see IGNORE_AUTHORS)") # pylint: disable=line-too-long
+    commit_parser.add_argument("notebook_file", help = "Path of the exported notebook HTML file")
+    commit_parser.add_argument("-m", "--message", default = "Update lab notebook",
+                               help = "Commit message (default: %(default)s)")
+
+    upgrade_parser: argparse.ArgumentParser = subparsers.add_parser("upgrade", help = "Add the settings of the new pylabnotebook versions to .labnotebookrc, keeping the existing ones") # pylint: disable=line-too-long
+    upgrade_parser.add_argument("--dry-run", default = False, action = "store_true",
+                                help = "Only show what would change")
 
     args = parser.parse_args()
 
@@ -48,7 +67,11 @@ def main():
             sys.exit(128)
     elif args.command == "export":
         try:
-            export_labnotebook(args.output, args.force, not args.no_link)
+            output_path: str = os.path.abspath(args.output)  # export moves to the git root
+            export_labnotebook(output_path, args.force, not args.no_link, since = args.since,
+                               until = args.until, branch = args.branch, paths = args.paths)
+            if args.commit:
+                commit_labnotebook(output_path)
         except NotGitRepoError as e:
             print(e)
             sys.exit(128)
@@ -58,9 +81,28 @@ def main():
         except OutputAlreadyExistsError as e:
             print(e)
             sys.exit(17)
-        except EmptyHisoryError as e:
+        except EmptyHistoryError as e:
             print(e)
             sys.exit(5)
+        except InvalidConfigError as e:
+            print(e)
+            sys.exit(22)
+        except subprocess.CalledProcessError as error:
+            sys.exit(error.returncode)
+    elif args.command == "commit":
+        try:
+            commit_labnotebook(args.notebook_file, args.message)
+        except subprocess.CalledProcessError as error:
+            sys.exit(error.returncode)
+    elif args.command == "upgrade":
+        try:
+            upgrade_labnotebook(args.dry_run)
+        except NotGitRepoError as e:
+            print(e)
+            sys.exit(128)
+        except NotInitializedError as e:
+            print(e)
+            sys.exit(2)
     else:
         parser.print_help()
 

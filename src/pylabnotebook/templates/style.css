@@ -74,6 +74,30 @@ p {
     padding-left: 0.5em;
 }
 
+.mess-el {
+    white-space: pre-line;
+}
+
+.changed-later {
+    color: gray;
+    font-size: 0.85em;
+}
+
+.tag-el {
+    background-color: rgba(133, 167, 119, 0.8);
+    border-radius: 5px;
+    color: white;
+    font-size: 0.8em;
+    padding: 0.1em 0.5em;
+}
+
+.images-el img {
+    border: 1px solid lightgray;
+    margin: 0.3em 0.3em 0.3em 0;
+    max-height: 150px;
+    max-width: 250px;
+}
+
 .commit-el {
     padding: 1rem;
 }
@@ -109,3 +133,64 @@ footer {
     background-color: rgba(110, 143, 97, 0.874);
 }
 
+
+#search {
+    display: block;
+    font-size: 1em;
+    margin: 0.8em auto 0;
+    padding: 0.3em 0.6em;
+    width: min(100%, 30em);
+}
+
+#sidebar {
+    font-size: 0.85em;
+    left: 0;
+    max-height: 100vh;
+    overflow-y: auto;
+    padding: 1rem 0.5rem;
+    position: fixed;
+    top: 0;
+    width: 12%;
+}
+
+#sidebar ul {
+    list-style: none;
+}
+
+#sidebar a {
+    color: inherit;
+}
+
+@media (max-width: 900px) {
+    #sidebar {
+        display: none;
+    }
+
+    body {
+        max-width: 100%;
+    }
+}
+
+@media print {
+    #sidebar,
+    #search,
+    #bottom-btn {
+        display: none;
+    }
+
+    html {
+        background-color: white;
+    }
+
+    body {
+        max-width: 100%;
+    }
+
+    h2 {
+        break-after: avoid;
+    }
+
+    .commit-el {
+        break-inside: avoid;
+    }
+}

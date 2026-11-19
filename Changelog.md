@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Sidebar with links to dates in order (to move easier throughout the document).
+- Print styles: printing (or saving as PDF from the browser) hides the navigation and expands changed files.
 - Thumbnails of the images (`IMAGE_EXT`) changed in a commit, if unchanged since.
 - Git tags shown as milestone badges next to the commit title.
 - Search box to filter commits by title, message, author, files or sha.

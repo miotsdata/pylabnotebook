@@ -78,6 +78,8 @@ The commit is made as ``labnotebook <labnotebook@localhost>`` (only the notebook
 
 To export and commit in one step: ``labnotebook export -o my_project.html -f --commit``.
 
+To get a PDF, open the notebook in a browser and print it (Save as PDF): navigation elements are hidden and the changed files lists are expanded.
+
 Notebook customization
 --------------------------------
 

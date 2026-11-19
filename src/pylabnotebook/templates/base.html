@@ -99,6 +99,11 @@
       </p>
     </footer>
     <script>
+      // Printed notebooks (eg. Save as PDF) show the changed files lists
+      window.addEventListener("beforeprint", function () {
+        document.querySelectorAll("details").forEach((details) => (details.open = true));
+      });
+
       // Hide commits not matching the search, and days left without commits
       document.getElementById("search").addEventListener("input", function () {
         const query = this.value.toLowerCase();

@@ -4,7 +4,7 @@ import subprocess
 import tempfile
 
 from pylabnotebook.commit import commit_labnotebook, NOTEBOOK_AUTHOR_EMAIL
-from pylabnotebook.export import get_sha_list
+from pylabnotebook.export import get_commits
 
 
 def test_notebook_commits_are_ignored():
@@ -18,9 +18,11 @@ def test_notebook_commits_are_ignored():
             notebook_file.write("<html></html>")
         commit_labnotebook("notebook.html")
 
-        assert len(get_sha_list(False)) == 2
-        assert len(get_sha_list(False, [NOTEBOOK_AUTHOR_EMAIL])) == 1
-        assert len(get_sha_list(False, ["tester"])) == 1
+        def count_commits(ignored_authors):
+            return len(get_commits(False, ignored_authors, [".html"], []))
+        assert count_commits([]) == 2
+        assert count_commits([NOTEBOOK_AUTHOR_EMAIL]) == 1
+        assert count_commits(["tester"]) == 1
 
 
 if __name__ == "__main__":

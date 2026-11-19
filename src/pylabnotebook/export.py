@@ -55,16 +55,14 @@ def export_labnotebook(output_file: str, force: bool, link: bool) -> None:
     if os.path.exists(output_file) and not force:
         raise OutputAlreadyExistsError(f"{RED}Error: {output_file} already exists. Use -f/--force to overwrite it.{NCOL}")
 
-    # 5. Get list of commits sha
+    # 5. Get commits
     # Old .labnotebookrc files have no IGNORE_AUTHORS: still skip `labnotebook commit` commits
-    sha_list: list[str] = get_sha_list(config.get("REVERSE_HISTORY"),
-                                       config.get("IGNORE_AUTHORS", [NOTEBOOK_AUTHOR_EMAIL]) or [])
+    commits: list[dict] = get_commits(reverse_history = config.get("REVERSE_HISTORY"),
+                                      ignored_authors = config.get("IGNORE_AUTHORS", [NOTEBOOK_AUTHOR_EMAIL]) or [],
+                                      analysis_ext = config.get("ANALYSIS_EXT") or [],
+                                      excluded_patterns = config.get("ANALYSIS_IGNORE") or [])
 
-    # 6. Get info about each commit
-    commits_info: dict = {sha: get_commit_info(sha, analysis_ext = config.get('ANALYSIS_EXT'),
-                                               excluded_patterns = config.get('ANALYSIS_IGNORE')) for sha in sha_list}
-
-    # 7. Read style.css
+    # 6. Read style.css
     with open(config.get('LAB_CSS'), 'r', encoding='utf-8') as css_file:
         style_css = css_file.read()
 
@@ -73,7 +71,7 @@ def export_labnotebook(output_file: str, force: bool, link: bool) -> None:
     content = template.render(config = config,
                               create_date = datetime.today().strftime('%Y-%m-%d'),
                               link = link,
-                              commits_info = commits_info,
+                              commits = commits,
                               style_css = style_css)
 
     with open(output_file, mode="w", encoding="utf-8") as message:
@@ -81,80 +79,83 @@ def export_labnotebook(output_file: str, force: bool, link: bool) -> None:
         print(f"Notebook succesfully exported to {output_file}.")
 
 
-def get_sha_list(reverse_history: bool, ignored_authors: list[str] = ()) -> list[str]:
-    """Get sha list.
+# Field/record separators that cannot appear in commit metadata
+FIELD_SEPARATOR: str = "\x1f"
+RECORD_SEPARATOR: str = "\x1e"
+LOG_FIELDS: list[str] = ["sha", "author", "author_email", "date", "title", "message"]
 
-    This functions returns a list of commits sha (from oldest to newest) that have not been already 
-    included in the notebook.
+
+def get_commits(reverse_history: bool, ignored_authors: list[str], analysis_ext: list[str],
+                excluded_patterns: list[str]) -> list[dict]:
+    """Get the commits to show in the notebook, with a single git log call.
 
     :param reverse_history: Whether commits should be returned from first to last.
     :type reverse_history: bool
     :param ignored_authors: author names or emails whose commits are left out of the notebook.
     :type ignored_authors: list[str]
-    :return: list of the commits not included in the notebook since last_commit.
-    :rtype: list[str]
-    """
-
-    # 1. Get list of all commits
-    git_command = ["git", "log", "--pretty=format:%h%x00%an%x00%ae"]
-    if reverse_history:
-        git_command.append("--reverse")
-
-    try:
-        git_log_lines: list[str] = subprocess.check_output(git_command, text = True, stderr=subprocess.PIPE).split('\n')
-    except subprocess.CalledProcessError:
-        raise EmptyHisoryError(f"{RED}Error: Git history is empty{NCOL}") from None
-
-    ignored_authors = set(ignored_authors)
-    git_sha: list[str] = []
-    for log_line in git_log_lines:
-        commit_sha, author_name, author_email = log_line.split('\0')
-        if author_name not in ignored_authors and author_email not in ignored_authors:
-            git_sha.append(commit_sha)
-
-    return git_sha
-
-
-def get_commit_info(commit_sha: str, analysis_ext: list[str], excluded_patterns: list[str]) -> dict:
-    """Get commit info.
-
-    This function returns a dictionary of the information about the commit specified in commit_sha. 
-    These info are: date, author, title, message, changed files and analysis_files (based on both
-    analysis_ext and excluded_patterns).
-
-    :param commit_sha: sha of the commit of interest.
-    :type commit_sha: str
     :param analysis_ext: list of the file extensions used as reference for analysis files.
     :type analysis_ext: list[str]
     :param excluded_patterns: list of the pattern to be excluded from the analysis files.
     :type excluded_patterns: list[str]
-    
-    :return: information about the commit specified in commit_sha: date, author, title, message, 
-    changed files and analysis_files (based on both analysis_ext and excluded_patterns).
-    :rtype: dict
+    :return: one dict per commit with sha, short_sha, author, author_email, date, title, message,
+        changed_files (list of dicts with status, path, old_path) and analysis_files.
+    :rtype: list[dict]
     """
-    date, author, title = subprocess.check_output(['git', 'log', '-n', '1', '--pretty=format:%cs%n%an%n%s', commit_sha], text = True).strip().split('\n')
+    log_format: str = "%x1e" + "%x1f".join(["%H", "%an", "%ae", "%cs", "%s", "%b"]) + "%x1f"
+    git_command: list[str] = ["git", "log", "-z", "--raw", "--no-abbrev", f"--format={log_format}"]
+    if reverse_history:
+        git_command.append("--reverse")
 
-    # Newlines are kept by "white-space: pre-line" in the css
-    message: str = subprocess.check_output(['git', 'log', '-n', '1', '--pretty=format:%b', commit_sha], text=True).strip()
+    try:
+        git_log: str = subprocess.check_output(git_command, text = True, stderr = subprocess.PIPE)
+    except subprocess.CalledProcessError:
+        raise EmptyHisoryError(f"{RED}Error: Git history is empty{NCOL}") from None
 
-    changed_files: list[str] = subprocess.check_output(['git', 'show', '--pretty=%n', '--name-status', commit_sha], text=True).strip().split('\n')
-    if changed_files == ['']:
-        changed_files = {}
-    else:
-        changed_files: dict = {file.split('\t')[1] : file.split('\t')[0] for file in changed_files}
-    analysis_files: list[str] = [key for key, _ in changed_files.items()
-                                 if key.endswith(tuple(analysis_ext)) and
-                                 os.path.isfile(key) and not
-                                 is_ignored(key, excluded_patterns)]
-    commit_info: dict = {'date': date,
-                         'author': author,
-                         'title': title,
-                         'message': message,
-                         'changed_files': changed_files,
-                         'analysis_files': analysis_files}
+    ignored_authors = set(ignored_authors)
+    commits: list[dict] = []
+    for commit_record in git_log.split(RECORD_SEPARATOR)[1:]:
+        *field_values, raw_changes = commit_record.split(FIELD_SEPARATOR, len(LOG_FIELDS))
+        commit: dict = dict(zip(LOG_FIELDS, field_values))
+        if commit["author"] in ignored_authors or commit["author_email"] in ignored_authors:
+            continue
+        commit["short_sha"] = commit["sha"][:7]
+        commit["message"] = commit["message"].strip()
+        commit["changed_files"] = parse_raw_changes(raw_changes)
+        commit["analysis_files"] = [changed_file["path"] for changed_file in commit["changed_files"]
+                                    if changed_file["status"] != "D" and
+                                    changed_file["path"].endswith(tuple(analysis_ext)) and
+                                    os.path.isfile(changed_file["path"]) and
+                                    not is_ignored(changed_file["path"], excluded_patterns)]
+        commits.append(commit)
 
-    return commit_info
+    return commits
+
+
+def parse_raw_changes(raw_changes: str) -> list[dict]:
+    """Parse the NUL separated output of git log -z --raw for one commit.
+
+    Each change is ``:<modes> <blobs> <status>\\0<path>\\0``, with two paths for renames/copies.
+
+    :param raw_changes: raw changes of one commit.
+    :type raw_changes: str
+    :return: list of dicts with status (one letter), path, old_path (None unless renamed/copied)
+        and blob (the new blob id).
+    :rtype: list[dict]
+    """
+    raw_tokens: list[str] = raw_changes.lstrip("\0\n").split("\0")
+    changed_files: list[dict] = []
+    token_index: int = 0
+    while token_index < len(raw_tokens) and raw_tokens[token_index].startswith(":"):
+        _, _, _, new_blob, status = raw_tokens[token_index].split(" ")
+        if status[0] in "RC":
+            old_path, new_path = raw_tokens[token_index + 1], raw_tokens[token_index + 2]
+            token_index += 3
+        else:
+            old_path, new_path = None, raw_tokens[token_index + 1]
+            token_index += 2
+        changed_files.append({"status": status[0], "path": new_path, "old_path": old_path,
+                              "blob": new_blob})
+    return changed_files
 
 
 def is_ignored(file_path: str, ignore_patterns: list[str]) -> bool:

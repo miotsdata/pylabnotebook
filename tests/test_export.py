@@ -56,3 +56,14 @@ def test_analysis_ext_matches_suffix_only(tmp_path):
     notebook_html = export_html()
     assert 'href="report.html"' in notebook_html
     assert 'href="report.html.bak"' not in notebook_html
+
+
+def test_renames_and_non_ascii_paths(tmp_path):
+    make_repository(tmp_path)
+    commit_file("café.html", "content", "add report")
+    git("mv", "café.html", "renamed.html")
+    git("commit", "-q", "-m", "rename report")
+    notebook_html = export_html()
+    assert "café.html &rarr; renamed.html" in notebook_html
+    assert 'href="renamed.html"' in notebook_html
+    assert notebook_html.count('class="commit-el"') == 2

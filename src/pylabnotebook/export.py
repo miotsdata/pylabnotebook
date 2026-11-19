@@ -8,6 +8,7 @@ This module contains notebook export functions.
 
 import subprocess
 import os
+import re
 import yaml
 from fnmatch import fnmatch
 from datetime import datetime
@@ -78,6 +79,7 @@ def export_labnotebook(output_file: str, force: bool, link: bool, since: str = N
     # Old .labnotebookrc files have no IGNORE_AUTHORS: still skip `labnotebook commit` commits
     commits: list[dict] = get_commits(reverse_history = config.get("REVERSE_HISTORY"),
                                       ignored_authors = config.get("IGNORE_AUTHORS", [NOTEBOOK_AUTHOR_EMAIL]) or [],
+                                      ignored_messages = config.get("IGNORE_MESSAGES") or [],
                                       analysis_ext = config.get("ANALYSIS_EXT") or [],
                                       excluded_patterns = config.get("ANALYSIS_IGNORE") or [],
                                       log_arguments = log_arguments)
@@ -116,7 +118,8 @@ LOG_FIELDS: list[str] = ["sha", "author", "author_email", "date", "title", "mess
 
 
 def get_commits(reverse_history: bool, ignored_authors: list[str], analysis_ext: list[str],
-                excluded_patterns: list[str], log_arguments: list[str] = ()) -> list[dict]:
+                excluded_patterns: list[str], log_arguments: list[str] = (),
+                ignored_messages: list[str] = ()) -> list[dict]:
     """Get the commits to show in the notebook, with a single git log call.
 
     :param reverse_history: Whether commits should be returned from first to last.
@@ -129,6 +132,8 @@ def get_commits(reverse_history: bool, ignored_authors: list[str], analysis_ext:
     :type excluded_patterns: list[str]
     :param log_arguments: extra git log arguments (filters, revision, -- paths), appended last.
     :type log_arguments: list[str]
+    :param ignored_messages: regular expressions: commits whose title matches any are left out.
+    :type ignored_messages: list[str]
     :return: one dict per commit with sha, short_sha, author, author_email, date, title, message,
         changed_files (list of dicts, see parse_raw_changes) and analysis_files (subset of
         changed_files).
@@ -155,6 +160,8 @@ def get_commits(reverse_history: bool, ignored_authors: list[str], analysis_ext:
         *field_values, raw_changes = commit_record.split(FIELD_SEPARATOR, len(LOG_FIELDS))
         commit: dict = dict(zip(LOG_FIELDS, field_values))
         if commit["author"] in ignored_authors or commit["author_email"] in ignored_authors:
+            continue
+        if any(re.search(message_pattern, commit["title"]) for message_pattern in ignored_messages):
             continue
         commit["short_sha"] = commit["sha"][:7]
         commit["message"] = commit["message"].strip()

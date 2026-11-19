@@ -6,3 +6,4 @@ LAB_CSS:  # custom css file (relative to the git root), empty for the default st
 ANALYSIS_EXT: ['.html']
 ANALYSIS_IGNORE: []
 IGNORE_AUTHORS: ['{{ notebook_author_email }}']
+IGNORE_MESSAGES: []

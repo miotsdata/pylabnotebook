@@ -128,3 +128,13 @@ def test_history_filters(tmp_path):
     assert "on feature" not in export_html()
     assert "on feature" in export_html(branch = "feature")
     assert 'class="commit-el"' not in export_html(since = "2090-01-01")
+
+
+def test_ignore_messages(tmp_path):
+    make_repository(tmp_path)
+    commit_file("a.txt", "a", "real work")
+    commit_file("b.txt", "b", "wip: half done")
+    with open(".labnotebookrc", "a", encoding = "utf-8") as config_file:
+        config_file.write("IGNORE_MESSAGES: ['^wip']\n")
+    notebook_html = export_html()
+    assert "real work" in notebook_html and "half done" not in notebook_html

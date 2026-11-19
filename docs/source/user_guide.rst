@@ -91,6 +91,8 @@ There are several customization that can be applied to the notebook:
 
 * you can exclude commits from the notebook by author name or email, listing them in the *IGNORE_AUTHORS* variable (eg. IGNORE_AUTHORS: ['labnotebook@localhost', 'ci-bot']). By default it contains the identity used by ``labnotebook commit``.
 
+* you can exclude commits whose title matches a regular expression with the *IGNORE_MESSAGES* variable (eg. IGNORE_MESSAGES: ['^wip', '^fixup!']).
+
 Link to analysis files
 ^^^^^^^^^^^^^^^^^^^^^^^^
 

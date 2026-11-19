@@ -47,7 +47,7 @@ def export_labnotebook(output_file: str, force: bool, link: bool) -> None:
 
     # 2. Check for .labnotebookrc
     if not os.path.exists(".labnotebookrc"):
-        raise NotInitializedError(f"{RED}Error: There is no .labnotebookrc file in git repository root folder. Please, run labnotebook create -n <name_of_the_project>{NCOL}")
+        raise NotInitializedError(f"{RED}Error: There is no .labnotebookrc file in git repository root folder. Please, run labnotebook init -n <name_of_the_project>{NCOL}")
 
     with open(".labnotebookrc", "r", encoding = 'utf8') as config_file:
         config: dict = yaml.safe_load(config_file)

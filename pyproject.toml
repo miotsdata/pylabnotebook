@@ -20,8 +20,8 @@ classifiers = [
 keywords = ["git", "notebook", "track", "history", "log"]
 
 [project.urls]
-Homepage = "https://github.com/mmiots9/pylabnotebook"
-Issues =  "https://github.com/mmiots9/pylabnotebook/issues"
+Homepage = "https://github.com/miotsdata/pylabnotebook"
+Issues =  "https://github.com/miotsdata/pylabnotebook/issues"
 
 [project.scripts]
 labnotebook = "pylabnotebook.cli:main"

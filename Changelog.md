@@ -85,9 +85,9 @@ Run `labnotebook upgrade` to add the new settings to an existing `.labnotebookrc
 - New behaviour for newlines in message section. It will now put a newline tag whenever it finds a newline sign from the original commit message which follows a fullstop, a question mark, an exclamation mark or a colon.
 - Updated version of example page in documentation.
 
-[unreleased]: https://github.com/mmiots9/pylabnotebook/compare/0.4.0...HEAD
-[0.4.0]: https://github.com/mmiots9/pylabnotebook/compare/0.3.1...0.4.0
-[0.3.1]: https://github.com/mmiots9/pylabnotebook/compare/0.3.0...0.3.1
-[0.3.0]: https://github.com/mmiots9/pylabnotebook/compare/0.2.1...0.3.0
-[0.2.1]: https://github.com/mmiots9/pylabnotebook/compare/0.2.0...0.2.1
-[0.2.0]: https://github.com/mmiots9/pylabnotebook/compare/v0.1.11..v0.2.0
+[unreleased]: https://github.com/miotsdata/pylabnotebook/compare/0.4.0...HEAD
+[0.4.0]: https://github.com/miotsdata/pylabnotebook/compare/0.3.1...0.4.0
+[0.3.1]: https://github.com/miotsdata/pylabnotebook/compare/0.3.0...0.3.1
+[0.3.0]: https://github.com/miotsdata/pylabnotebook/compare/0.2.1...0.3.0
+[0.2.1]: https://github.com/miotsdata/pylabnotebook/compare/0.2.0...0.2.1
+[0.2.0]: https://github.com/miotsdata/pylabnotebook/compare/v0.1.11..v0.2.0

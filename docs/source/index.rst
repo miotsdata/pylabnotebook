@@ -9,7 +9,7 @@ As bioinformatician, I use it a lot for my analysis, as I always commit after ea
 
 View and example of labnotebook |example_link|.
 
-For reporting bugs or other issues with pylabnotebook please use: https://github.com/mmiots9/pylabnotebook/issues.
+For reporting bugs or other issues with pylabnotebook please use: https://github.com/miotsdata/pylabnotebook/issues.
 
 For any other questions please contact us via miotsdata@gmail.com.
 

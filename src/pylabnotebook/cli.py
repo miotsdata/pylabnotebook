@@ -10,7 +10,7 @@ import subprocess
 import sys
 
 from .version import __version__
-from .init import init_labnotebook
+from .init import init_labnotebook, upgrade_labnotebook
 from .export import export_labnotebook
 from .commit import commit_labnotebook, NOTEBOOK_AUTHOR_NAME, NOTEBOOK_AUTHOR_EMAIL
 from .exceptions import NotGitRepoError, NotInitializedError, OutputAlreadyExistsError, EmptyHistoryError, InvalidConfigError
@@ -53,6 +53,10 @@ def main():
     commit_parser.add_argument("-m", "--message", default = "Update lab notebook",
                                help = "Commit message (default: %(default)s)")
 
+    upgrade_parser: argparse.ArgumentParser = subparsers.add_parser("upgrade", help = "Add the settings of the new pylabnotebook versions to .labnotebookrc, keeping the existing ones") # pylint: disable=line-too-long
+    upgrade_parser.add_argument("--dry-run", default = False, action = "store_true",
+                                help = "Only show what would change")
+
     args = parser.parse_args()
 
     if args.command == "init":
@@ -90,6 +94,15 @@ def main():
             commit_labnotebook(args.notebook_file, args.message)
         except subprocess.CalledProcessError as error:
             sys.exit(error.returncode)
+    elif args.command == "upgrade":
+        try:
+            upgrade_labnotebook(args.dry_run)
+        except NotGitRepoError as e:
+            print(e)
+            sys.exit(128)
+        except NotInitializedError as e:
+            print(e)
+            sys.exit(2)
     else:
         parser.print_help()
 

@@ -202,3 +202,38 @@ def test_show_analysis_files_false(tmp_path):
     with open(".labnotebookrc", "a", encoding = "utf-8") as config_file:
         config_file.write("SHOW_ANALYSIS_FILES: False\n")
     assert "Analysis file/s" not in export_html()
+
+
+OLD_CONFIG = """NOTEBOOK_NAME: old project
+LAB_AUTHOR: someone
+REVERSE_HISTORY: True
+SHOW_ANALYSIS_FILES: True
+LAB_CSS: /old/venv/lib/python3.11/site-packages/pylabnotebook/templates/style.css
+ANALYSIS_EXT: ['.html', '.pdf']
+# my comment
+ANALYSIS_IGNORE: ['^old/', '*.tmp']"""
+
+
+def test_upgrade_keeps_old_settings_and_adds_new_ones(tmp_path, capsys):
+    from pylabnotebook.init import upgrade_labnotebook
+    os.chdir(tmp_path)
+    git("init", "-q")
+    with open(".labnotebookrc", "w", encoding = "utf-8") as config_file:
+        config_file.write(OLD_CONFIG)
+
+    upgrade_labnotebook(dry_run = True)
+    assert open(".labnotebookrc", encoding = "utf-8").read() == OLD_CONFIG
+
+    upgrade_labnotebook()
+    upgraded_config = open(".labnotebookrc", encoding = "utf-8").read()
+    assert open(".labnotebookrc.bak", encoding = "utf-8").read() == OLD_CONFIG
+    assert upgraded_config.startswith(OLD_CONFIG.split("LAB_CSS")[0])
+    assert "# my comment\nANALYSIS_IGNORE: ['^old/', '*.tmp']\n" in upgraded_config
+    assert "ANALYSIS_EXT: ['.html', '.pdf']" in upgraded_config
+    assert "site-packages" not in upgraded_config
+    for new_setting in ("IGNORE_AUTHORS:", "IGNORE_MESSAGES:", "REMOTE_URL:", "IMAGE_EXT:"):
+        assert upgraded_config.count(new_setting) == 1
+    assert "'*.tmp' is not a valid regular expression" in capsys.readouterr().out
+
+    upgrade_labnotebook()
+    assert "already up to date" in capsys.readouterr().out

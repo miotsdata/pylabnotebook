@@ -48,6 +48,17 @@ A message that confirms the creation of the .labnotebookrc file should appear on
 .. note::
     Remember to never change the name of .labnotebookrc file.
 
+Upgrade the configuration
+--------------------------------
+
+After updating pylabnotebook, add the new settings to an existing `.labnotebookrc` with:
+
+.. code-block:: console
+
+   (.venv) $ labnotebook upgrade
+
+Your settings (and comments) are kept: missing settings are appended with their default value, and an old absolute *LAB_CSS* path to the default style is emptied. The previous file is saved as `.labnotebookrc.bak`. Use ``--dry-run`` to only see what would change.
+
 Export a notebook
 --------------------------------
 

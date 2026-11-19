@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Git tags shown as milestone badges next to the commit title.
 - Search box to filter commits by title, message, author, files or sha.
 - `labnotebook commit` command: commits the exported notebook as `labnotebook <labnotebook@localhost>`.
+- `labnotebook upgrade` command: adds new settings to an existing `.labnotebookrc`, keeping the current ones.
 - `labnotebook export --commit`: export and commit the notebook in one step.
 - `export --since/--until/--branch/--path` to export part of the history.
 - `IGNORE_MESSAGES` config option: commits whose title matches one of these regular expressions are excluded.

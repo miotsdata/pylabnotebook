@@ -94,7 +94,7 @@ def export_labnotebook(output_file: str, force: bool, link: bool, since: str = N
 
     # 6. Read style.css. Old .labnotebookrc files point to the css of the install that created them
     lab_css: str = config.get("LAB_CSS") or ""
-    if not lab_css or lab_css.replace(os.sep, "/").endswith("pylabnotebook/templates/style.css"):
+    if not lab_css or is_bundled_css_path(lab_css):
         lab_css = f"{SCRIPT_DIR}/templates/style.css"
     with open(lab_css, 'r', encoding='utf-8') as css_file:
         style_css = css_file.read()
@@ -251,3 +251,13 @@ def check_regex_options(config: dict) -> None:
                 re.compile(pattern)
             except re.error as regex_error:
                 raise InvalidConfigError(f"{RED}Error: {option_name} in .labnotebookrc: {pattern!r} is not a valid regular expression ({regex_error}). Patterns are regular expressions, eg. '\\.tmp\\.html$' instead of '*.tmp.html'.{NCOL}") from None
+
+
+def is_bundled_css_path(lab_css: str) -> bool:
+    """Whether lab_css is the absolute path of the bundled css that old versions wrote in .labnotebookrc.
+
+    :param lab_css: LAB_CSS value.
+    :type lab_css: str
+    :rtype: bool
+    """
+    return lab_css.replace(os.sep, "/").endswith("pylabnotebook/templates/style.css")

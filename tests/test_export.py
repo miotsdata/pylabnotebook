@@ -78,3 +78,14 @@ def test_date_is_author_date(tmp_path):
         del os.environ["GIT_AUTHOR_DATE"]
     git("commit", "-q", "--amend", "--no-edit")  # rewriting changes the committer date only
     assert ">2020-01-02</h2>" in export_html()
+
+
+def test_output_relative_to_cwd_and_links_relative_to_output(tmp_path):
+    make_repository(tmp_path)
+    commit_file("reports/a.html", "a", "report")
+    os.makedirs("docs")
+    os.chdir("docs")
+    export_labnotebook("notebook.html", force = True, link = True)
+    notebook_html = (tmp_path / "docs" / "notebook.html").read_text(encoding = "utf-8")
+    assert 'href="../reports/a.html"' in notebook_html
+    assert not (tmp_path / "notebook.html").exists()

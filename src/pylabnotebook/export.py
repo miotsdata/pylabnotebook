@@ -35,7 +35,8 @@ def export_labnotebook(output_file: str, force: bool, link: bool) -> None:
 
     """
 
-    # 1. Go to git root dir
+    # 1. Go to git root dir (output_file is relative to where the command is run)
+    output_path: str = os.path.abspath(output_file)
     try:
         git_root: str = subprocess.check_output(["git", "rev-parse", "--show-toplevel"],
                                         universal_newlines = True, stderr=subprocess.PIPE).strip()
@@ -52,7 +53,7 @@ def export_labnotebook(output_file: str, force: bool, link: bool) -> None:
         config: dict = yaml.safe_load(config_file)
 
     # 3. Check if file already exists and force is False
-    if os.path.exists(output_file) and not force:
+    if os.path.exists(output_path) and not force:
         raise OutputAlreadyExistsError(f"{RED}Error: {output_file} already exists. Use -f/--force to overwrite it.{NCOL}")
 
     # 5. Get commits
@@ -61,6 +62,12 @@ def export_labnotebook(output_file: str, force: bool, link: bool) -> None:
                                       ignored_authors = config.get("IGNORE_AUTHORS", [NOTEBOOK_AUTHOR_EMAIL]) or [],
                                       analysis_ext = config.get("ANALYSIS_EXT") or [],
                                       excluded_patterns = config.get("ANALYSIS_IGNORE") or [])
+
+    # Links must work from the folder the notebook is saved in
+    output_dir: str = os.path.dirname(output_path)
+    for commit in commits:
+        for analysis_file in commit["analysis_files"]:
+            analysis_file["href"] = os.path.relpath(analysis_file["path"], output_dir).replace(os.sep, "/")
 
     # 6. Read style.css
     with open(config.get('LAB_CSS'), 'r', encoding='utf-8') as css_file:
@@ -74,7 +81,7 @@ def export_labnotebook(output_file: str, force: bool, link: bool) -> None:
                               commits = commits,
                               style_css = style_css)
 
-    with open(output_file, mode="w", encoding="utf-8") as message:
+    with open(output_path, mode="w", encoding="utf-8") as message:
         message.write(content)
         print(f"Notebook succesfully exported to {output_file}.")
 
@@ -98,7 +105,8 @@ def get_commits(reverse_history: bool, ignored_authors: list[str], analysis_ext:
     :param excluded_patterns: list of the pattern to be excluded from the analysis files.
     :type excluded_patterns: list[str]
     :return: one dict per commit with sha, short_sha, author, author_email, date, title, message,
-        changed_files (list of dicts with status, path, old_path) and analysis_files.
+        changed_files (list of dicts, see parse_raw_changes) and analysis_files (subset of
+        changed_files).
     :rtype: list[dict]
     """
     log_format: str = "%x1e" + "%x1f".join(["%H", "%an", "%ae", "%as", "%s", "%b"]) + "%x1f"
@@ -121,7 +129,7 @@ def get_commits(reverse_history: bool, ignored_authors: list[str], analysis_ext:
         commit["short_sha"] = commit["sha"][:7]
         commit["message"] = commit["message"].strip()
         commit["changed_files"] = parse_raw_changes(raw_changes)
-        commit["analysis_files"] = [changed_file["path"] for changed_file in commit["changed_files"]
+        commit["analysis_files"] = [changed_file for changed_file in commit["changed_files"]
                                     if changed_file["status"] != "D" and
                                     changed_file["path"].endswith(tuple(analysis_ext)) and
                                     os.path.isfile(changed_file["path"]) and

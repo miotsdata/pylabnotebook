@@ -37,14 +37,14 @@
         <div class="analyses-el">
           Analysis file/s:
           <ul class="analysis_list">
-            {% for a_file in commit.get('analysis_files') %} {% if link %}
+            {% for analysis_file in commit.analysis_files %} {% if link %}
             <li>
               <code
-                ><a href="{{ a_file }}" target="_blank">{{ a_file }}</a></code
+                ><a href="{{ analysis_file.href }}" target="_blank">{{ analysis_file.path }}</a></code
               >
             </li>
             {% else %}
-            <li><code>{{ a_file }}</code></li>
+            <li><code>{{ analysis_file.path }}</code></li>
             {% endif %} {% endfor %}
           </ul>
         </div>

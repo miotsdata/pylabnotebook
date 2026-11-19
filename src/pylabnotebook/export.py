@@ -15,6 +15,7 @@ from jinja2 import Environment, FileSystemLoader
 
 from .exceptions import NotGitRepoError, NotInitializedError, OutputAlreadyExistsError, EmptyHistoryError
 from .commit import NOTEBOOK_AUTHOR_EMAIL
+from .version import __version__
 
 # useful values
 RED: str = '\033[0;31m'
@@ -82,7 +83,8 @@ def export_labnotebook(output_file: str, force: bool, link: bool) -> None:
                               create_date = datetime.today().strftime('%Y-%m-%d'),
                               link = link,
                               commits = commits,
-                              style_css = style_css)
+                              style_css = style_css,
+                              version = __version__)
 
     with open(output_path, mode="w", encoding="utf-8") as message:
         message.write(content)

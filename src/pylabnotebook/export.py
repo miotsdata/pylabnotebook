@@ -22,7 +22,8 @@ RED: str = '\033[0;31m'
 NCOL: str = '\033[0m'
 SCRIPT_DIR: str = os.path.dirname(os.path.abspath(__file__))
 
-def export_labnotebook(output_file: str, force: bool, link: bool) -> None:
+def export_labnotebook(output_file: str, force: bool, link: bool, since: str = None, until: str = None,
+                       branch: str = None, paths: list[str] = None) -> None:
     """Export labnotebook to html.
 
     This function exports the labnotebook into a single html file ready to read and share.
@@ -33,11 +34,27 @@ def export_labnotebook(output_file: str, force: bool, link: bool) -> None:
     :type force: bool
     :param link: whether to create links to analysis files in analysis files bullet list. These links can be used to open the analysis files directly from the notebook. # pylint: disable=line-too-long
     :type link: bool
-
+    :param since: only commits more recent than this date (any git date, eg. 2024-01-31 or "2 weeks ago").
+    :type since: str
+    :param until: only commits older than this date.
+    :type until: str
+    :param branch: branch, tag or revision range to export instead of the current branch.
+    :type branch: str
+    :param paths: only commits changing these files/folders (relative to the current folder).
+    :type paths: list[str]
     """
 
     # 1. Go to git root dir (output_file is relative to where the command is run)
     output_path: str = os.path.abspath(output_file)
+    log_arguments: list[str] = []
+    if since:
+        log_arguments.append(f"--since={since}")
+    if until:
+        log_arguments.append(f"--until={until}")
+    if branch:
+        log_arguments.append(branch)
+    if paths:
+        log_arguments += ["--full-diff", "--", *(os.path.abspath(path) for path in paths)]
     try:
         git_root: str = subprocess.check_output(["git", "rev-parse", "--show-toplevel"],
                                         universal_newlines = True, stderr=subprocess.PIPE).strip()
@@ -62,7 +79,8 @@ def export_labnotebook(output_file: str, force: bool, link: bool) -> None:
     commits: list[dict] = get_commits(reverse_history = config.get("REVERSE_HISTORY"),
                                       ignored_authors = config.get("IGNORE_AUTHORS", [NOTEBOOK_AUTHOR_EMAIL]) or [],
                                       analysis_ext = config.get("ANALYSIS_EXT") or [],
-                                      excluded_patterns = config.get("ANALYSIS_IGNORE") or [])
+                                      excluded_patterns = config.get("ANALYSIS_IGNORE") or [],
+                                      log_arguments = log_arguments)
 
     # Links must work from the folder the notebook is saved in
     output_dir: str = os.path.dirname(output_path)
@@ -98,7 +116,7 @@ LOG_FIELDS: list[str] = ["sha", "author", "author_email", "date", "title", "mess
 
 
 def get_commits(reverse_history: bool, ignored_authors: list[str], analysis_ext: list[str],
-                excluded_patterns: list[str]) -> list[dict]:
+                excluded_patterns: list[str], log_arguments: list[str] = ()) -> list[dict]:
     """Get the commits to show in the notebook, with a single git log call.
 
     :param reverse_history: Whether commits should be returned from first to last.
@@ -109,6 +127,8 @@ def get_commits(reverse_history: bool, ignored_authors: list[str], analysis_ext:
     :type analysis_ext: list[str]
     :param excluded_patterns: list of the pattern to be excluded from the analysis files.
     :type excluded_patterns: list[str]
+    :param log_arguments: extra git log arguments (filters, revision, -- paths), appended last.
+    :type log_arguments: list[str]
     :return: one dict per commit with sha, short_sha, author, author_email, date, title, message,
         changed_files (list of dicts, see parse_raw_changes) and analysis_files (subset of
         changed_files).
@@ -118,6 +138,7 @@ def get_commits(reverse_history: bool, ignored_authors: list[str], analysis_ext:
     git_command: list[str] = ["git", "log", "-z", "--raw", "--no-abbrev", "--author-date-order", f"--format={log_format}"]
     if reverse_history:
         git_command.append("--reverse")
+    git_command += log_arguments
 
     try:
         git_log: str = subprocess.check_output(git_command, text = True, stderr = subprocess.PIPE)

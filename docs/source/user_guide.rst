@@ -59,6 +59,12 @@ To export the notebook as a single .html file, from any folder of the project ty
 
 It will create a my_project.html file with the notebook (the path is relative to the current folder). You can then share the notebook with peers.
 
+To export only part of the history:
+
+* ``--since 2024-01-01`` / ``--until "2 weeks ago"``: commits in a date range (any date git understands).
+* ``--branch feature`` (or a range like ``main..feature``): another branch instead of the current one.
+* ``--path analyses/`` (repeatable): only commits changing these files/folders (all changed files of those commits are listed).
+
 Commit the notebook
 --------------------------------
 

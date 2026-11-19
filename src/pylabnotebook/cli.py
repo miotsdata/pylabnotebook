@@ -42,6 +42,11 @@ def main():
                                help = "Disable links to analyses files.") # pylint: disable=line-too-long
     export_parser.add_argument("-c", "--commit", default = False, action = "store_true",
                                help = "Commit the exported notebook (same as labnotebook commit)")
+    export_parser.add_argument("--since", help = "Only commits more recent than this date (eg. 2024-01-31 or '2 weeks ago')")
+    export_parser.add_argument("--until", help = "Only commits older than this date")
+    export_parser.add_argument("--branch", help = "Branch, tag or revision range (eg. main..feature) to export instead of the current branch")
+    export_parser.add_argument("--path", action = "append", dest = "paths",
+                               help = "Only commits changing this file/folder (can be repeated)")
 
     commit_parser: argparse.ArgumentParser = subparsers.add_parser("commit", help = f"Commit the exported notebook as {NOTEBOOK_AUTHOR_NAME} <{NOTEBOOK_AUTHOR_EMAIL}>, so that it is excluded from the notebook (see IGNORE_AUTHORS)") # pylint: disable=line-too-long
     commit_parser.add_argument("notebook_file", help = "Path of the exported notebook HTML file")
@@ -59,7 +64,8 @@ def main():
     elif args.command == "export":
         try:
             output_path: str = os.path.abspath(args.output)  # export moves to the git root
-            export_labnotebook(output_path, args.force, not args.no_link)
+            export_labnotebook(output_path, args.force, not args.no_link, since = args.since,
+                               until = args.until, branch = args.branch, paths = args.paths)
             if args.commit:
                 commit_labnotebook(output_path)
         except NotGitRepoError as e:

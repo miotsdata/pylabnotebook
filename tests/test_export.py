@@ -115,3 +115,16 @@ def test_init_without_git_user_name(tmp_path, monkeypatch):
     git("init", "-q")
     init_labnotebook("demo")
     assert os.path.exists(".labnotebookrc")
+
+
+def test_history_filters(tmp_path):
+    make_repository(tmp_path)
+    commit_file("analyses/a.txt", "a", "in analyses")
+    commit_file("other.txt", "o", "outside analyses")
+    git("checkout", "-q", "-b", "feature")
+    commit_file("feature.txt", "f", "on feature")
+    git("checkout", "-q", "-")
+    assert "outside analyses" not in export_html(paths = ["analyses"])
+    assert "on feature" not in export_html()
+    assert "on feature" in export_html(branch = "feature")
+    assert 'class="commit-el"' not in export_html(since = "2090-01-01")

@@ -10,3 +10,4 @@ dist/.pdm-python
 .pdm-python
 dist/
 docs/build
+.venv/

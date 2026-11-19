@@ -102,7 +102,9 @@ If you want to add different extensions, you can update the `.labnotebookrc` fil
 
 Moreover, changing values inside "ANALYSIS_IGNORE" list, you can exclude some files/folders to be recognized as analysis files. As in a .gitignore file, it uses wildcards: a pattern matches the whole path, any file/folder name or any folder (eg. ANALYSIS_IGNORE: ['draft_*', 'old_reports/', '*.tmp.html']).
 
-If you want to disable all links, pass the `no-link` flag to the export command.
+Images changed in a commit (extensions in *IMAGE_EXT*, default png, jpg, jpeg, gif, svg, webp) are shown as thumbnails, unless they were changed in a later commit (the notebook would show the newer version). *ANALYSIS_IGNORE* applies to them too.
+
+If you want to disable all links (and thumbnails), pass the `no-link` flag to the export command.
 
 Link to the remote repository
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

@@ -22,6 +22,7 @@ from .version import __version__
 RED: str = '\033[0;31m'
 NCOL: str = '\033[0m'
 SCRIPT_DIR: str = os.path.dirname(os.path.abspath(__file__))
+DEFAULT_IMAGE_EXT: list[str] = ['.png', '.jpg', '.jpeg', '.gif', '.svg', '.webp']
 
 def export_labnotebook(output_file: str, force: bool, link: bool, since: str = None, until: str = None,
                        branch: str = None, paths: list[str] = None) -> None:
@@ -82,13 +83,14 @@ def export_labnotebook(output_file: str, force: bool, link: bool, since: str = N
                                       ignored_messages = config.get("IGNORE_MESSAGES") or [],
                                       analysis_ext = config.get("ANALYSIS_EXT") or [],
                                       excluded_patterns = config.get("ANALYSIS_IGNORE") or [],
+                                      image_ext = config.get("IMAGE_EXT", DEFAULT_IMAGE_EXT) or [],
                                       log_arguments = log_arguments)
 
     # Links must work from the folder the notebook is saved in
     output_dir: str = os.path.dirname(output_path)
     for commit in commits:
-        for analysis_file in commit["analysis_files"]:
-            analysis_file["href"] = os.path.relpath(analysis_file["path"], output_dir).replace(os.sep, "/")
+        for changed_file in commit["changed_files"]:
+            changed_file["href"] = os.path.relpath(changed_file["path"], output_dir).replace(os.sep, "/")
 
     # 6. Read style.css. Old .labnotebookrc files point to the css of the install that created them
     lab_css: str = config.get("LAB_CSS") or ""
@@ -120,7 +122,7 @@ LOG_FIELDS: list[str] = ["sha", "author", "author_email", "date", "title", "mess
 
 def get_commits(reverse_history: bool, ignored_authors: list[str], analysis_ext: list[str],
                 excluded_patterns: list[str], log_arguments: list[str] = (),
-                ignored_messages: list[str] = ()) -> list[dict]:
+                ignored_messages: list[str] = (), image_ext: list[str] = ()) -> list[dict]:
     """Get the commits to show in the notebook, with a single git log call.
 
     :param reverse_history: Whether commits should be returned from first to last.
@@ -135,8 +137,10 @@ def get_commits(reverse_history: bool, ignored_authors: list[str], analysis_ext:
     :type log_arguments: list[str]
     :param ignored_messages: regular expressions: commits whose title matches any are left out.
     :type ignored_messages: list[str]
+    :param image_ext: extensions of the images to show as thumbnails (only if unchanged since).
+    :type image_ext: list[str]
     :return: one dict per commit with sha, short_sha, tags, author, author_email, date, title, message,
-        changed_files (list of dicts, see parse_raw_changes) and analysis_files (subset of
+        changed_files (list of dicts, see parse_raw_changes), analysis_files and images (subsets of
         changed_files).
     :rtype: list[dict]
     """
@@ -177,13 +181,18 @@ def get_commits(reverse_history: bool, ignored_authors: list[str], analysis_ext:
         commit["tags"] = tags_by_sha.get(commit["sha"], [])
         commit["message"] = commit["message"].strip()
         commit["changed_files"] = parse_raw_changes(raw_changes)
-        commit["analysis_files"] = [changed_file for changed_file in commit["changed_files"]
-                                    if changed_file["status"] != "D" and
-                                    changed_file["path"].endswith(tuple(analysis_ext)) and
-                                    os.path.isfile(changed_file["path"]) and
-                                    not is_ignored(changed_file["path"], excluded_patterns)]
-        for analysis_file in commit["analysis_files"]:
-            analysis_file["changed_later"] = head_blobs.get(analysis_file["path"]) != analysis_file["blob"]
+        for changed_file in commit["changed_files"]:
+            changed_file["changed_later"] = head_blobs.get(changed_file["path"]) != changed_file["blob"]
+        shown_files: list[dict] = [changed_file for changed_file in commit["changed_files"]
+                                   if changed_file["status"] != "D" and
+                                   not is_ignored(changed_file["path"], excluded_patterns)]
+        commit["analysis_files"] = [changed_file for changed_file in shown_files
+                                    if changed_file["path"].endswith(tuple(analysis_ext)) and
+                                    os.path.isfile(changed_file["path"])]
+        # A thumbnail of a later version would be misleading
+        commit["images"] = [changed_file for changed_file in shown_files
+                            if changed_file["path"].lower().endswith(tuple(image_ext)) and
+                            not changed_file["changed_later"]]
         commits.append(commit)
 
     return commits

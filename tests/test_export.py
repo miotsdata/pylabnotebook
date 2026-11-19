@@ -176,3 +176,13 @@ def test_tags_are_shown(tmp_path):
     notebook_html = export_html()
     assert '<span class="tag-el">lightweight-tag</span>' in notebook_html
     assert '<span class="tag-el">annotated-tag</span>' in notebook_html
+
+
+def test_image_thumbnails(tmp_path):
+    make_repository(tmp_path)
+    commit_file("plots/a.png", "png", "plot a")
+    commit_file("plots/b.svg", "<svg/>", "plot b first")
+    commit_file("plots/b.svg", "<svg></svg>", "plot b second")
+    notebook_html = export_html()
+    assert notebook_html.count('<img src="plots/a.png"') == 1
+    assert notebook_html.count('<img src="plots/b.svg"') == 1

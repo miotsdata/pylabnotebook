@@ -64,6 +64,16 @@
 
         {% endif %}
 
+        {% if link and commit.images %}
+        <div class="images-el">
+          {% for image in commit.images %}
+          <a href="{{ image.href }}" target="_blank"
+            ><img src="{{ image.href }}" alt="{{ image.path }}" title="{{ image.path }}" loading="lazy"
+          /></a>
+          {% endfor %}
+        </div>
+        {% endif %}
+
         <details>
           <summary>Changed files:</summary>
           <ul class="changed_list">

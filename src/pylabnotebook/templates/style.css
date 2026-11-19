@@ -91,6 +91,13 @@ p {
     padding: 0.1em 0.5em;
 }
 
+.images-el img {
+    border: 1px solid lightgray;
+    margin: 0.3em 0.3em 0.3em 0;
+    max-height: 150px;
+    max-width: 250px;
+}
+
 .commit-el {
     padding: 1rem;
 }

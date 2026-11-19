@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.1] - 2026-11-19
+
+### Fixed
+
+- Repository links (package metadata, notebook footer, docs) point to github.com/miotsdata/pylabnotebook.
+
 ## [0.4.0] - 2026-11-19
 
 Run `labnotebook upgrade` to add the new settings to an existing `.labnotebookrc`.
@@ -85,7 +91,8 @@ Run `labnotebook upgrade` to add the new settings to an existing `.labnotebookrc
 - New behaviour for newlines in message section. It will now put a newline tag whenever it finds a newline sign from the original commit message which follows a fullstop, a question mark, an exclamation mark or a colon.
 - Updated version of example page in documentation.
 
-[unreleased]: https://github.com/miotsdata/pylabnotebook/compare/0.4.0...HEAD
+[unreleased]: https://github.com/miotsdata/pylabnotebook/compare/0.4.1...HEAD
+[0.4.1]: https://github.com/miotsdata/pylabnotebook/compare/0.4.0...0.4.1
 [0.4.0]: https://github.com/miotsdata/pylabnotebook/compare/0.3.1...0.4.0
 [0.3.1]: https://github.com/miotsdata/pylabnotebook/compare/0.3.0...0.3.1
 [0.3.0]: https://github.com/miotsdata/pylabnotebook/compare/0.2.1...0.3.0

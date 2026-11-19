@@ -101,8 +101,8 @@ def get_commits(reverse_history: bool, ignored_authors: list[str], analysis_ext:
         changed_files (list of dicts with status, path, old_path) and analysis_files.
     :rtype: list[dict]
     """
-    log_format: str = "%x1e" + "%x1f".join(["%H", "%an", "%ae", "%cs", "%s", "%b"]) + "%x1f"
-    git_command: list[str] = ["git", "log", "-z", "--raw", "--no-abbrev", f"--format={log_format}"]
+    log_format: str = "%x1e" + "%x1f".join(["%H", "%an", "%ae", "%as", "%s", "%b"]) + "%x1f"
+    git_command: list[str] = ["git", "log", "-z", "--raw", "--no-abbrev", "--author-date-order", f"--format={log_format}"]
     if reverse_history:
         git_command.append("--reverse")
 

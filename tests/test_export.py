@@ -67,3 +67,14 @@ def test_renames_and_non_ascii_paths(tmp_path):
     assert "café.html &rarr; renamed.html" in notebook_html
     assert 'href="renamed.html"' in notebook_html
     assert notebook_html.count('class="commit-el"') == 2
+
+
+def test_date_is_author_date(tmp_path):
+    make_repository(tmp_path)
+    os.environ["GIT_AUTHOR_DATE"] = "2020-01-02T10:00:00"
+    try:
+        commit_file("a.txt", "a", "old work")
+    finally:
+        del os.environ["GIT_AUTHOR_DATE"]
+    git("commit", "-q", "--amend", "--no-edit")  # rewriting changes the committer date only
+    assert ">2020-01-02</h2>" in export_html()

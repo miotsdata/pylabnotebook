@@ -186,3 +186,12 @@ def test_image_thumbnails(tmp_path):
     notebook_html = export_html()
     assert notebook_html.count('<img src="plots/a.png"') == 1
     assert notebook_html.count('<img src="plots/b.svg"') == 1
+
+
+def test_show_analysis_files_false(tmp_path):
+    make_repository(tmp_path)
+    commit_file("a.html", "a", "report")
+    assert "Analysis file/s" in export_html()
+    with open(".labnotebookrc", "a", encoding = "utf-8") as config_file:
+        config_file.write("SHOW_ANALYSIS_FILES: False\n")
+    assert "Analysis file/s" not in export_html()

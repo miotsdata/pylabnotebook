@@ -38,6 +38,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Renamed files and file names with non-ASCII characters.
 - Analysis files changed in later commits are flagged, since links open the current version.
 - `init` works when git `user.name` is not set; error message referenced the non-existing `create` command.
+- `SHOW_ANALYSIS_FILES: False` had no effect; it now hides the analysis files list.
 - Export is much faster on long histories (one git call instead of three per commit).
 
 ## [0.3.1] - 2024-11-15

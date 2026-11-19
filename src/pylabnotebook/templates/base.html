@@ -43,7 +43,8 @@
           sha: {% if remote_url %}<a href="{{ remote_url }}/commit/{{ commit.sha }}" target="_blank">{{ commit.short_sha }}</a>{% else %}{{ commit.short_sha }}{% endif %}
         </p>
 
-        {% if commit.get('analysis_files')|length == 0 %}
+        {% if config.get('SHOW_ANALYSIS_FILES', True) == False %}
+        {% elif commit.get('analysis_files')|length == 0 %}
         <div class="analyses-el">Analysis file/s: <code>none</code></div>
         {% else %}
         <div class="analyses-el">

@@ -106,6 +106,8 @@ Moreover, changing values inside "ANALYSIS_IGNORE" list, you can exclude some fi
 
 Images changed in a commit (extensions in *IMAGE_EXT*, default png, jpg, jpeg, gif, svg, webp) are shown as thumbnails, unless they were changed in a later commit (the notebook would show the newer version). *ANALYSIS_IGNORE* applies to them too.
 
+Set *SHOW_ANALYSIS_FILES* to False to hide the analysis files list.
+
 If you want to disable all links (and thumbnails), pass the `no-link` flag to the export command.
 
 Link to the remote repository

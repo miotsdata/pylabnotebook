@@ -29,7 +29,9 @@
         <h3 class="title-el">{{ commit.get('title') }}</h3>
         <p class="mess-el">{{ commit.get('message') }}</p>
         <p class="author-el">Author: {{ commit.get('author') }}</p>
-        <p class="sha-el">sha: {{ commit.short_sha }}</p>
+        <p class="sha-el">
+          sha: {% if remote_url %}<a href="{{ remote_url }}/commit/{{ commit.sha }}" target="_blank">{{ commit.short_sha }}</a>{% else %}{{ commit.short_sha }}{% endif %}
+        </p>
 
         {% if commit.get('analysis_files')|length == 0 %}
         <div class="analyses-el">Analysis file/s: <code>none</code></div>
@@ -42,7 +44,7 @@
               <code
                 ><a href="{{ analysis_file.href }}" target="_blank">{{ analysis_file.path }}</a></code
               >{% if analysis_file.changed_later %}
-              <span class="changed-later" title="The link opens the current version">(changed in a later commit)</span>{% endif %}
+              <span class="changed-later" title="The link opens the current version">(changed in a later commit{% if remote_url %}, <a href="{{ remote_url }}/blob/{{ commit.sha }}/{{ analysis_file.path | urlencode }}" target="_blank">version of this commit</a>{% endif %})</span>{% endif %}
             </li>
             {% else %}
             <li><code>{{ analysis_file.path }}</code></li>

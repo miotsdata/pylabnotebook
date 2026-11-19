@@ -104,3 +104,8 @@ Moreover, changing values inside "ANALYSIS_IGNORE" list, you can exclude some fi
 
 If you want to disable all links, pass the `no-link` flag to the export command.
 
+Link to the remote repository
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+If *REMOTE_URL* is set in `.labnotebookrc` (`init` fills it from the `origin` remote, eg. https://github.com/user/repo), each commit sha links to the commit page and analysis files changed in a later commit also link to their version at that commit (GitHub/GitLab style URLs).
+

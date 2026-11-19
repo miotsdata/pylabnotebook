@@ -7,3 +7,4 @@ ANALYSIS_EXT: ['.html']
 ANALYSIS_IGNORE: []
 IGNORE_AUTHORS: ['{{ notebook_author_email }}']
 IGNORE_MESSAGES: []
+REMOTE_URL: {{ remote_url }}  # web url of the repository, used to link commits and file versions

@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `labnotebook export --commit`: export and commit the notebook in one step.
 - `export --since/--until/--branch/--path` to export part of the history.
 - `IGNORE_MESSAGES` config option: commits whose title matches one of these regular expressions are excluded.
+- `REMOTE_URL` config option (filled by `init` from `origin`): links commits and the file version of each commit to the remote.
 - `IGNORE_AUTHORS` config option: commits by these author names/emails are excluded from the notebook (defaults to the `labnotebook commit` identity, also for existing `.labnotebookrc` files).
 
 ### Changed

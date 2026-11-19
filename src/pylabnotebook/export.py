@@ -104,7 +104,8 @@ def export_labnotebook(output_file: str, force: bool, link: bool, since: str = N
                               link = link,
                               commits = commits,
                               style_css = style_css,
-                              version = __version__)
+                              version = __version__,
+                              remote_url = (config.get("REMOTE_URL") or "").rstrip("/"))
 
     with open(output_path, mode="w", encoding="utf-8") as message:
         message.write(content)

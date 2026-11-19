@@ -138,3 +138,22 @@ def test_ignore_messages(tmp_path):
         config_file.write("IGNORE_MESSAGES: ['^wip']\n")
     notebook_html = export_html()
     assert "real work" in notebook_html and "half done" not in notebook_html
+
+
+def test_remote_url(tmp_path):
+    os.chdir(tmp_path)
+    git("init", "-q")
+    git("remote", "add", "origin", "git@github.com:someone/project.git")
+    from pylabnotebook.init import get_remote_web_url
+    assert get_remote_web_url() == "https://github.com/someone/project"
+    git("remote", "set-url", "origin", "https://user:token@gitlab.com/someone/project.git")
+    assert get_remote_web_url() == "https://gitlab.com/someone/project"
+    git("config", "user.name", "tester")
+    git("config", "user.email", "tester@example.org")
+    init_labnotebook("demo")
+    commit_file("my report.html", "first", "first version")
+    commit_file("my report.html", "second", "second version")
+    notebook_html = export_html()
+    first_sha = git("rev-list", "--max-parents=0", "HEAD").strip()
+    assert f"https://gitlab.com/someone/project/commit/{first_sha}" in notebook_html
+    assert f"https://gitlab.com/someone/project/blob/{first_sha}/my%20report.html" in notebook_html

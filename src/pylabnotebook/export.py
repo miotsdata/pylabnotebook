@@ -13,7 +13,7 @@ from fnmatch import fnmatch
 from datetime import datetime
 from jinja2 import Environment, FileSystemLoader
 
-from .exceptions import NotGitRepoError, NotInitializedError, OutputAlreadyExistsError, EmptyHisoryError
+from .exceptions import NotGitRepoError, NotInitializedError, OutputAlreadyExistsError, EmptyHistoryError
 from .commit import NOTEBOOK_AUTHOR_EMAIL
 
 # useful values
@@ -86,7 +86,7 @@ def export_labnotebook(output_file: str, force: bool, link: bool) -> None:
 
     with open(output_path, mode="w", encoding="utf-8") as message:
         message.write(content)
-        print(f"Notebook succesfully exported to {output_file}.")
+        print(f"Notebook successfully exported to {output_file}.")
 
 
 # Field/record separators that cannot appear in commit metadata
@@ -120,7 +120,7 @@ def get_commits(reverse_history: bool, ignored_authors: list[str], analysis_ext:
     try:
         git_log: str = subprocess.check_output(git_command, text = True, stderr = subprocess.PIPE)
     except subprocess.CalledProcessError:
-        raise EmptyHisoryError(f"{RED}Error: Git history is empty{NCOL}") from None
+        raise EmptyHistoryError(f"{RED}Error: Git history is empty{NCOL}") from None
 
     # Blob of each file in HEAD, to tell whether a link still shows the version of that commit
     head_files: list[str] = subprocess.check_output(["git", "ls-tree", "-r", "-z", "HEAD"], text = True).split("\0")

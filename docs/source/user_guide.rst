@@ -9,7 +9,7 @@
 CLI Documentation
 =======================
 
-This is the official documentation for the CLI version of pylabnotebook. All commands explained here have a corresponding function (see API), but I highly reccomend to run this package from the command line, as it was created for.
+This is the official documentation for the CLI version of pylabnotebook. All commands explained here have a corresponding function (see API), but I highly recommend to run this package from the command line, as it was created for.
 
 Installation
 ----------------
@@ -27,7 +27,7 @@ To check the installation:
    (.venv) $ labnotebook --version
 
 .. warning::
-    Whilst the python dependencies are automatically downloaded and installed, this package highly relies on git. Therefore, there are some git requirements that need to be fullfilled:
+    Whilst the python dependencies are automatically downloaded and installed, this package highly relies on git. Therefore, there are some git requirements that need to be fulfilled:
 
     * **git version** >= 2.40.1, otherwise some functionalities do not work
     * **git author and git email** set, otherwise the tool cannot create a notebook, as it checks for git author.

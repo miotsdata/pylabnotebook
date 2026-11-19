@@ -12,7 +12,7 @@ from .version import __version__
 from .init import init_labnotebook
 from .export import export_labnotebook
 from .commit import commit_labnotebook, NOTEBOOK_AUTHOR_NAME, NOTEBOOK_AUTHOR_EMAIL
-from .exceptions import NotGitRepoError, NotInitializedError, OutputAlreadyExistsError, EmptyHisoryError
+from .exceptions import NotGitRepoError, NotInitializedError, OutputAlreadyExistsError, EmptyHistoryError
 
 def main():
     """Main cli function handler.
@@ -65,7 +65,7 @@ def main():
         except OutputAlreadyExistsError as e:
             print(e)
             sys.exit(17)
-        except EmptyHisoryError as e:
+        except EmptyHistoryError as e:
             print(e)
             sys.exit(5)
     elif args.command == "commit":

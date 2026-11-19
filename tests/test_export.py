@@ -47,3 +47,12 @@ def test_analysis_ignore_uses_wildcards():
     assert is_ignored("old/reports/a.html", ["reports/"])
     assert is_ignored("draft_a.html", ["draft_*"])
     assert not is_ignored("reports/a.html", ["*.txt", "old"])
+
+
+def test_analysis_ext_matches_suffix_only(tmp_path):
+    make_repository(tmp_path)
+    commit_file("report.html", "r", "report")
+    commit_file("report.html.bak", "b", "backup")
+    notebook_html = export_html()
+    assert 'href="report.html"' in notebook_html
+    assert 'href="report.html.bak"' not in notebook_html

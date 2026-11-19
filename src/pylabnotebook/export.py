@@ -144,7 +144,7 @@ def get_commit_info(commit_sha: str, analysis_ext: list[str], excluded_patterns:
     else:
         changed_files: dict = {file.split('\t')[1] : file.split('\t')[0] for file in changed_files}
     analysis_files: list[str] = [key for key, _ in changed_files.items()
-                                 if any(ext in key for ext in analysis_ext) and
+                                 if key.endswith(tuple(analysis_ext)) and
                                  os.path.isfile(key) and not
                                  is_ignored(key, excluded_patterns)]
     commit_info: dict = {'date': date,

@@ -106,3 +106,12 @@ def test_analysis_file_changed_later_is_flagged(tmp_path):
     commit_file("a.html", "first", "first version")
     commit_file("a.html", "second", "second version")
     assert export_html().count("changed in a later commit") == 1
+
+
+def test_init_without_git_user_name(tmp_path, monkeypatch):
+    monkeypatch.setenv("GIT_CONFIG_GLOBAL", os.devnull)
+    monkeypatch.setenv("GIT_CONFIG_NOSYSTEM", "1")
+    os.chdir(tmp_path)
+    git("init", "-q")
+    init_labnotebook("demo")
+    assert os.path.exists(".labnotebookrc")

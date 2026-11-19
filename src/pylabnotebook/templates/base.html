@@ -14,7 +14,7 @@
     <header>
       <h1 id="labtitle">{{ config["NOTEBOOK_NAME"] }} lab notebook</h1>
       <p id="creationdate">Created on: {{ create_date }}</p>
-      <p id="labauthor">Author: {{ config["LAB_AUTHOR"] }}</p>
+      <p id="labauthor">Author: {{ config["LAB_AUTHOR"] or "" }}</p>
     </header>
     {% set ns = namespace(last_date = None) %}
     <main>

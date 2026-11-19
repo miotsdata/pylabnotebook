@@ -37,8 +37,9 @@ def init_labnotebook(name: str) -> None:
     os.chdir(git_root)
 
     # 2. Get useful variables
-    author: str = subprocess.check_output(["git", "config", "--get", "user.name"],
-                                          universal_newlines = True).strip()
+    # Empty when git user.name is not set: LAB_AUTHOR can be filled in .labnotebookrc
+    author: str = subprocess.run(["git", "config", "--get", "user.name"],
+                                 capture_output = True, text = True, check = False).stdout.strip()
 
     # 3. Create config file
     create_config_json(name = name, author = author)

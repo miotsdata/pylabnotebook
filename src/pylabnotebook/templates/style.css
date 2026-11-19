@@ -74,6 +74,10 @@ p {
     padding-left: 0.5em;
 }
 
+.mess-el {
+    white-space: pre-line;
+}
+
 .commit-el {
     padding: 1rem;
 }

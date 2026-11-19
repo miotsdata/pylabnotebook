@@ -68,7 +68,7 @@ def export_labnotebook(output_file: str, force: bool, link: bool) -> None:
     with open(config.get('LAB_CSS'), 'r', encoding='utf-8') as css_file:
         style_css = css_file.read()
 
-    environment = Environment(loader=FileSystemLoader(f"{SCRIPT_DIR}/templates/"))
+    environment = Environment(loader=FileSystemLoader(f"{SCRIPT_DIR}/templates/"), autoescape = True)
     template = environment.get_template("base.html")
     content = template.render(config = config,
                               create_date = datetime.today().strftime('%Y-%m-%d'),
@@ -135,11 +135,8 @@ def get_commit_info(commit_sha: str, analysis_ext: list[str], excluded_patterns:
     """
     date, author, title = subprocess.check_output(['git', 'log', '-n', '1', '--pretty=format:%cs%n%an%n%s', commit_sha], text = True).strip().split('\n')
 
-    # Get message and replace newlines with html breaks
+    # Newlines are kept by "white-space: pre-line" in the css
     message: str = subprocess.check_output(['git', 'log', '-n', '1', '--pretty=format:%b', commit_sha], text=True).strip()
-    pattern: str = r"(\.|:|!|\?)\n"
-    replacement: str = r"\1<br>\n"
-    message = re.sub(pattern, replacement, message).replace('\n\n', '\n<br>\n')
 
     changed_files: list[str] = subprocess.check_output(['git', 'show', '--pretty=%n', '--name-status', commit_sha], text=True).strip().split('\n')
     if changed_files == ['']:

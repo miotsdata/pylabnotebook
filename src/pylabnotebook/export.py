@@ -69,8 +69,11 @@ def export_labnotebook(output_file: str, force: bool, link: bool) -> None:
         for analysis_file in commit["analysis_files"]:
             analysis_file["href"] = os.path.relpath(analysis_file["path"], output_dir).replace(os.sep, "/")
 
-    # 6. Read style.css
-    with open(config.get('LAB_CSS'), 'r', encoding='utf-8') as css_file:
+    # 6. Read style.css. Old .labnotebookrc files point to the css of the install that created them
+    lab_css: str = config.get("LAB_CSS") or ""
+    if not lab_css or lab_css.replace(os.sep, "/").endswith("pylabnotebook/templates/style.css"):
+        lab_css = f"{SCRIPT_DIR}/templates/style.css"
+    with open(lab_css, 'r', encoding='utf-8') as css_file:
         style_css = css_file.read()
 
     environment = Environment(loader=FileSystemLoader(f"{SCRIPT_DIR}/templates/"), autoescape = True)

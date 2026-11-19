@@ -89,3 +89,13 @@ def test_output_relative_to_cwd_and_links_relative_to_output(tmp_path):
     notebook_html = (tmp_path / "docs" / "notebook.html").read_text(encoding = "utf-8")
     assert 'href="../reports/a.html"' in notebook_html
     assert not (tmp_path / "notebook.html").exists()
+
+
+def test_custom_and_default_css(tmp_path):
+    make_repository(tmp_path)
+    commit_file("a.txt", "a", "work")
+    assert "#bottom-btn" in export_html()
+    commit_file("my.css", "body { color: purple; }", "css")
+    with open(".labnotebookrc", "a", encoding = "utf-8") as config_file:
+        config_file.write("LAB_CSS: my.css\n")
+    assert "color: purple" in export_html()

@@ -57,11 +57,10 @@ def create_config_json(name: str, author: str) -> None:
     :param author: Author of the notebook.
     :type author: str
     """
-    environment = Environment(loader=FileSystemLoader(f"{SCRIPT_DIR}/templates/"))
+    environment = Environment(loader=FileSystemLoader(f"{SCRIPT_DIR}/templates/"), keep_trailing_newline = True)
     template = environment.get_template("rc")
     content = template.render(name = name,
                               author = author,
-                              script_dir = SCRIPT_DIR,
                               notebook_author_email = NOTEBOOK_AUTHOR_EMAIL)
 
     with open(".labnotebookrc", mode="w", encoding="utf-8") as config:

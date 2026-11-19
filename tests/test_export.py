@@ -1,4 +1,4 @@
-"""Run with: PYTHONPATH=src python3 -m pytest tests"""
+"""Run with: pdm run pytest"""
 import os
 import subprocess
 

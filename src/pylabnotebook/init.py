@@ -9,6 +9,7 @@ import os
 from jinja2 import Environment, FileSystemLoader
 
 from .exceptions import NotGitRepoError
+from .commit import NOTEBOOK_AUTHOR_EMAIL
 
 # useful values
 GREEN: str = '\033[0;32m'
@@ -60,7 +61,8 @@ def create_config_json(name: str, author: str) -> None:
     template = environment.get_template("rc")
     content = template.render(name = name,
                               author = author,
-                              script_dir = SCRIPT_DIR)
+                              script_dir = SCRIPT_DIR,
+                              notebook_author_email = NOTEBOOK_AUTHOR_EMAIL)
 
     with open(".labnotebookrc", mode="w", encoding="utf-8") as config:
         config.write(content)

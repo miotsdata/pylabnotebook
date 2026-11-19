@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Sidebar with links to dates in order (to move easier throughout the document).
+- `labnotebook commit` command: commits the exported notebook as `labnotebook <labnotebook@localhost>`.
+- `IGNORE_AUTHORS` config option: commits by these author names/emails are excluded from the notebook (defaults to the `labnotebook commit` identity, also for existing `.labnotebookrc` files).
 
 ## [0.3.1] - 2024-11-15
 

@@ -14,6 +14,7 @@ from datetime import datetime
 from jinja2 import Environment, FileSystemLoader
 
 from .exceptions import NotGitRepoError, NotInitializedError, OutputAlreadyExistsError, EmptyHisoryError
+from .commit import NOTEBOOK_AUTHOR_EMAIL
 
 # useful values
 RED: str = '\033[0;31m'
@@ -55,7 +56,9 @@ def export_labnotebook(output_file: str, force: bool, link: bool) -> None:
         raise OutputAlreadyExistsError(f"{RED}Error: {output_file} already exists. Use -f/--force to overwrite it.{NCOL}")
 
     # 5. Get list of commits sha
-    sha_list: list[str] = get_sha_list(config.get("REVERSE_HISTORY"))
+    # Old .labnotebookrc files have no IGNORE_AUTHORS: still skip `labnotebook commit` commits
+    sha_list: list[str] = get_sha_list(config.get("REVERSE_HISTORY"),
+                                       config.get("IGNORE_AUTHORS", [NOTEBOOK_AUTHOR_EMAIL]) or [])
 
     # 6. Get info about each commit
     commits_info: dict = {sha: get_commit_info(sha, analysis_ext = config.get('ANALYSIS_EXT'),
@@ -78,7 +81,7 @@ def export_labnotebook(output_file: str, force: bool, link: bool) -> None:
         print(f"Notebook succesfully exported to {output_file}.")
 
 
-def get_sha_list(reverse_history: bool) -> list[str]:
+def get_sha_list(reverse_history: bool, ignored_authors: list[str] = ()) -> list[str]:
     """Get sha list.
 
     This functions returns a list of commits sha (from oldest to newest) that have not been already 
@@ -86,19 +89,28 @@ def get_sha_list(reverse_history: bool) -> list[str]:
 
     :param reverse_history: Whether commits should be returned from first to last.
     :type reverse_history: bool
+    :param ignored_authors: author names or emails whose commits are left out of the notebook.
+    :type ignored_authors: list[str]
     :return: list of the commits not included in the notebook since last_commit.
     :rtype: list[str]
     """
 
     # 1. Get list of all commits
-    git_command = ["git", "log", "--pretty=format:%h"]
+    git_command = ["git", "log", "--pretty=format:%h%x00%an%x00%ae"]
     if reverse_history:
         git_command.append("--reverse")
 
     try:
-        git_sha: list[str] = subprocess.check_output(git_command, text = True, stderr=subprocess.PIPE).split('\n')
+        git_log_lines: list[str] = subprocess.check_output(git_command, text = True, stderr=subprocess.PIPE).split('\n')
     except subprocess.CalledProcessError:
         raise EmptyHisoryError(f"{RED}Error: Git history is empty{NCOL}") from None
+
+    ignored_authors = set(ignored_authors)
+    git_sha: list[str] = []
+    for log_line in git_log_lines:
+        commit_sha, author_name, author_email = log_line.split('\0')
+        if author_name not in ignored_authors and author_email not in ignored_authors:
+            git_sha.append(commit_sha)
 
     return git_sha
 

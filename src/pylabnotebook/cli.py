@@ -5,11 +5,13 @@ This module is the cli module where cli functionality of pylabnotebook is define
 # pylint: disable=line-too-long
 
 import argparse
+import subprocess
 import sys
 
 from .version import __version__
 from .init import init_labnotebook
 from .export import export_labnotebook
+from .commit import commit_labnotebook, NOTEBOOK_AUTHOR_NAME, NOTEBOOK_AUTHOR_EMAIL
 from .exceptions import NotGitRepoError, NotInitializedError, OutputAlreadyExistsError, EmptyHisoryError
 
 def main():
@@ -38,6 +40,11 @@ def main():
     export_parser.add_argument("--no-link", default = False, action = "store_true",
                                help = "Disable links to analyses files.") # pylint: disable=line-too-long
 
+    commit_parser: argparse.ArgumentParser = subparsers.add_parser("commit", help = f"Commit the exported notebook as {NOTEBOOK_AUTHOR_NAME} <{NOTEBOOK_AUTHOR_EMAIL}>, so that it is excluded from the notebook (see IGNORE_AUTHORS)") # pylint: disable=line-too-long
+    commit_parser.add_argument("notebook_file", help = "Path of the exported notebook HTML file")
+    commit_parser.add_argument("-m", "--message", default = "Update lab notebook",
+                               help = "Commit message (default: %(default)s)")
+
     args = parser.parse_args()
 
     if args.command == "init":
@@ -61,6 +68,11 @@ def main():
         except EmptyHisoryError as e:
             print(e)
             sys.exit(5)
+    elif args.command == "commit":
+        try:
+            commit_labnotebook(args.notebook_file, args.message)
+        except subprocess.CalledProcessError as error:
+            sys.exit(error.returncode)
     else:
         parser.print_help()
 

@@ -59,6 +59,17 @@ To export the notebook as a single .html file, from the root of the project type
 
 It will create a my_project.html file with the notebook. You can then share the notebook with peers.
 
+Commit the notebook
+--------------------------------
+
+If the exported notebook is tracked in the repository, commit it with:
+
+.. code-block:: console
+
+   (.venv) $ labnotebook commit my_project.html
+
+The commit is made as ``labnotebook <labnotebook@localhost>`` (only the notebook file is committed, anything else you staged is left untouched), so it does not appear in the notebook at the next export. Use ``-m`` to change the commit message.
+
 Notebook customization
 --------------------------------
 
@@ -69,6 +80,8 @@ There are several customization that can be applied to the notebook:
 * you can decide to show commits from last to first (default) or from first to last (changing *REVERSE_HISTORY* variable in `.labnotebookrc` to True).
 
 * you can change name and author of the notebook in `.labnotebookrc`, it will be passed to file when exporting the notebook.
+
+* you can exclude commits from the notebook by author name or email, listing them in the *IGNORE_AUTHORS* variable (eg. IGNORE_AUTHORS: ['labnotebook@localhost', 'ci-bot']). By default it contains the identity used by ``labnotebook commit``.
 
 Link to analysis files
 ^^^^^^^^^^^^^^^^^^^^^^^^

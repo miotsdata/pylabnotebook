@@ -78,6 +78,11 @@ p {
     white-space: pre-line;
 }
 
+.changed-later {
+    color: gray;
+    font-size: 0.85em;
+}
+
 .commit-el {
     padding: 1rem;
 }

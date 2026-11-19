@@ -99,3 +99,10 @@ def test_custom_and_default_css(tmp_path):
     with open(".labnotebookrc", "a", encoding = "utf-8") as config_file:
         config_file.write("LAB_CSS: my.css\n")
     assert "color: purple" in export_html()
+
+
+def test_analysis_file_changed_later_is_flagged(tmp_path):
+    make_repository(tmp_path)
+    commit_file("a.html", "first", "first version")
+    commit_file("a.html", "second", "second version")
+    assert export_html().count("changed in a later commit") == 1

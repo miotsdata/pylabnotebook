@@ -41,7 +41,8 @@
             <li>
               <code
                 ><a href="{{ analysis_file.href }}" target="_blank">{{ analysis_file.path }}</a></code
-              >
+              >{% if analysis_file.changed_later %}
+              <span class="changed-later" title="The link opens the current version">(changed in a later commit)</span>{% endif %}
             </li>
             {% else %}
             <li><code>{{ analysis_file.path }}</code></li>

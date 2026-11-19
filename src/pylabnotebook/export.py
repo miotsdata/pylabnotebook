@@ -122,6 +122,10 @@ def get_commits(reverse_history: bool, ignored_authors: list[str], analysis_ext:
     except subprocess.CalledProcessError:
         raise EmptyHisoryError(f"{RED}Error: Git history is empty{NCOL}") from None
 
+    # Blob of each file in HEAD, to tell whether a link still shows the version of that commit
+    head_files: list[str] = subprocess.check_output(["git", "ls-tree", "-r", "-z", "HEAD"], text = True).split("\0")
+    head_blobs: dict = {tree_entry.split("\t", 1)[1]: tree_entry.split()[2] for tree_entry in head_files if tree_entry}
+
     ignored_authors = set(ignored_authors)
     commits: list[dict] = []
     for commit_record in git_log.split(RECORD_SEPARATOR)[1:]:
@@ -137,6 +141,8 @@ def get_commits(reverse_history: bool, ignored_authors: list[str], analysis_ext:
                                     changed_file["path"].endswith(tuple(analysis_ext)) and
                                     os.path.isfile(changed_file["path"]) and
                                     not is_ignored(changed_file["path"], excluded_patterns)]
+        for analysis_file in commit["analysis_files"]:
+            analysis_file["changed_later"] = head_blobs.get(analysis_file["path"]) != analysis_file["blob"]
         commits.append(commit)
 
     return commits
